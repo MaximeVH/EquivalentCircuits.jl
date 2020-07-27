@@ -1,3 +1,11 @@
+"""
+    CircuitFunction(Circuit)
+Converts the string representation of a Circuit to a function with as inputs the circuit's
+parameter values and experimental input frequencies. The resulting outputted function
+calculates the impedance value that the circuit would produce with a given set of parameters
+and for a given frequency of the input voltage.
+
+"""
 function CircuitFunction(Circuit)
     for (f,t) in zip(["-","[",",","]"],["+","((",")^-1+(",")^-1)^-1"])
     Circuit=replace(Circuit,f=>t)

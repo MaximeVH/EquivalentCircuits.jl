@@ -1,3 +1,10 @@
+"""
+    ObjectiveFunction(CircFunc,measurements,frequencies)
+Returns the Least squares objective function between the measurements and a circuit's simulated
+impedance for a given set of circuit parameters at a specified range of experimental frequencies.
+This function is used to optimize the circuit parameters.
+
+"""
 function ObjectiveFunction(CircFunc,measurements,frequencies)
     function Objective(x)
         N = length(measurements)
