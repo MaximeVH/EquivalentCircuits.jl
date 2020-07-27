@@ -26,6 +26,6 @@ end
 function CircuitFitness(circuit,measurements,frequencies)
     CircFunc = CircuitFunction(circuit.string)
     ObjFunc = ObjectiveFunction(CircFunc,measurements,frequencies)
-    OptParams = OptimizeParameters(Objective,Initial_parameters)
+    OptParams = OptimizeParameters(ObjFunc,circuit.parameters)
     return ObjFunc(OptParams)
 end
