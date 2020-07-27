@@ -1,4 +1,4 @@
-name = "EquivalentCircuits"
+name = "EquivalentCircuits.jl"
 uuid = "da5bd070-f609-4e16-a30d-de86b3faa756"
 authors = ["Maxime Van Haeverbeke"]
 version = "0.1.0"
