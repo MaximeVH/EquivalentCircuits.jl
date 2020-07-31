@@ -1,28 +1,34 @@
-function CircuitEvolution(Population,measurements,frequencies,fitnesses=Nothing,mutation_rate=0.2)
-    Progenitors = [Population[rand(1:N,2)] for i in 1:N]
-    Parents = Array{RC_Circuit}(undef, 2)
-    Offspring = Array{RC_Circuit}(undef, N)
+"""
+CircuitEvolution(measurements,frequencies,generations=1,population_size=100)
 
-    for i in 1:N
-               Parents = Progenitors[i]
+For a given set of impedance measurements and their corresponding input frequencies, a genetic programming
+algorithm with a population size of population_size is run for generations iterations. 50% truncation selection
+    is applied in each generation so that the initial population size is preserved. The resulting population
+is returned.
+"""
+function CircuitEvolution(measurements,frequencies,generations=1,population_size=100)
+    Population = InitializePopulation(population_size)
+    Offspring = Array{RC_Circuit}(undef, population_size)
+    Progenitors = [Population[rand(1:population_size,2)] for i in 1:population_size]
+    #Generate Offspring.
+    for i in 1:population_size
+        println(i)
+        a = true
+        Parents = Progenitors[i]
+        while a == true
                Child = CircuitCrossover(Parents[1],Parents[2])
                Mutant = CircuitMutation(Child)
-               Offspring[i] = Mutant
+               if length(Mutant.parameters)>1 #We don't want univariate offspring.
+                   Offspring[i] = Mutant
+                   a = false
+               end
     end
-
-    if fitnesses == Nothing
-        Population_fitnesses = [CircuitFitness(i,measurements,frequencies) for i in Population]
-    else
-        Population_fitnesses = fitnesses
     end
-
+    Population_fitnesses = [CircuitFitness(i,measurements,frequencies) for i in Population]
     Offspring_fitness = [CircuitFitness(i,measurements,frequencies) for i in Offspring]
-
     Total_population = vcat(Population,Offspring)
     Total_fitness = vcat(Population_fitnesses,Offspring_fitness)
-
-    Next_generation = Total_population[sortperm(Total_fitness)[1:100]]
-    Next_generation_fitness = Total_fitness[sortperm(Total_fitness)[1:100]]
-
-    return
+    Selected = sortperm(Total_fitness)[1:population_size]
+    Next_generation = Total_population[Selected]
+    return Next_generation
 end
