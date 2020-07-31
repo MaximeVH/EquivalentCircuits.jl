@@ -12,7 +12,6 @@ function CircuitEvolution(measurements,frequencies,generations=1,population_size
     Progenitors = [Population[rand(1:population_size,2)] for i in 1:population_size]
     #Generate Offspring.
     for i in 1:population_size
-        println(i)
         a = true
         Parents = Progenitors[i]
         while a == true
