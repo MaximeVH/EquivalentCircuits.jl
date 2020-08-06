@@ -7,23 +7,23 @@ and for a given frequency of the input voltage.
 
 """
 function CircuitFunction(Circuit)
+    #Basic adjustments to get an expression.
     for (f,t) in zip(["-","[",",","]"],["+","((",")^-1+(",")^-1)^-1"])
-    Circuit=replace(Circuit,f=>t)
+        Circuit=replace(Circuit,f=>t)
     end
-    Cs = eachmatch(r"(C)([0-9])+",Circuit)
-        for c in Cs
-            Circuit = replace(Circuit,c.match=>"(1/(2im*π*f*"*c.match*"))")
+    for I in 2:-1:1
+        Es = eachmatch(Regex("([CLR])([0-9]){$(I)}"),Circuit)
+            for e in Es
+                match = e.match
+                if match[1] == 'C'
+                 Circuit = replace(Circuit,match=>"(1/(2im*π*f*"*"P["*match[2:end]*"]"*"))")
+                elseif match[1] == 'R'
+                 Circuit = replace(Circuit,match=>"P["*match[2:end]*"]")
+                elseif match[1] == 'L'
+                 Circuit = replace(Circuit,match=>"(2im*π*f*"*"P["*match[2:end]*"]"*")")
+            end
         end
-    double_matches = eachmatch(r"(C|R)([0-9]){2}",Circuit)
-    for E in double_matches
-        Circuit = replace(Circuit,E.match=>"P["*E.match[2:end]*"]")
-    end
-    single_matches = eachmatch(r"(C|R)([0-9]){1}",Circuit)
-    for E in single_matches
-        Circuit = replace(Circuit,E.match=>"P["*E.match[2:end]*"]")
-    end
-
+end
     Circuit_expression = Meta.parse(Circuit)
-
     return genfun(Circuit_expression,[:P,:f])
 end
