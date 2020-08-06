@@ -51,7 +51,7 @@ function CircuitExpression()
 end
 
 function NumberCircuit(Circuit)
-    elements = eachmatch(r"(R|C)",Circuit)
+    elements = eachmatch(r"([LRC])",Circuit)
     counter = 1
     Numbered_circuit = ""
     prev_ = 1
@@ -76,6 +76,41 @@ function CircuitString(CircuitExpr,numbered = true)
     end
     return string
 end
+
+function CircuitExpression(type,minimum_length = 2)
+    generated = false
+    Expression = ""
+    while generated == false
+        try
+        Expression = rand(RuleNode,CircuitGrammar,type)
+        catch ArgumentError
+            continue
+        end
+        if length(Expression) ≥ minimum_length*3
+            generated = true
+        end
+        # println(Expression)
+    end
+    return Expression
+end
+
+function CircuitExpression()
+    generated = false
+    Expression = ""
+    while generated == false
+        try
+        Expression = rand(RuleNode,CircuitGrammar,:B)
+        catch ArgumentError
+            continue
+        end
+        if length(Expression) ≥ 6
+            generated = true
+        end
+        # println(Expression)
+    end
+    return Expression
+end
+
 
 function InitializeCircuit(minimum_length=2)
     expression  = CircuitExpression(:B,minimum_length)

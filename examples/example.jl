@@ -19,7 +19,7 @@ frequencies = [10.0^i for i in LinRange(-1, 5, 50)]
 #Convert the circuit string notation into a callable function that can generate impedance
 #values corresponding to the circuits configuration and input frequencies.
 
-Failed_coating_function = CircuitFunction(failed_coating)
+Failed_coating_function = CircuitFunction2(failed_coating)
 
 # Generate the simulated impedance measurements, in this case the default noise ratio value
 # of 0.01 is used.

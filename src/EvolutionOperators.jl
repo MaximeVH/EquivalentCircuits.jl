@@ -45,7 +45,7 @@ The output fitness value is a measure of how well a given circuit configuration 
 of fitting the experimental data.
 """
 function CircuitFitness(circuit,measurements,frequencies)
-    CircFunc = CircuitFunction(circuit.string)
+    CircFunc = CircuitFunction2(circuit.string)
     ObjFunc = ObjectiveFunction(CircFunc,measurements,frequencies)
     OptParams = OptimizeParameters(ObjFunc,circuit.parameters)
     return ObjFunc(OptParams)
