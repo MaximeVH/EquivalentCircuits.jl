@@ -12,3 +12,12 @@ function InitializeParameters(Circuit,ranges=Dict('R'=>1000,'C'=>0.001,'L'=>1))
     end
     return Element_values
 end
+
+function karva_parameters(karva)
+    parameters = Array{Float16}(undef, length(karva))
+    ranges = Dict('R'=>1000,'C'=> 0.001,'L'=> 1,'+'=> 0,'-'=> 0)
+    for (e,i) in enumerate(karva)
+        parameters[e] = rand()*ranges[i]
+    end
+    return parameters
+end
