@@ -6,28 +6,15 @@ algorithm with a population size of population_size is run for generations itera
     is applied in each generation so that the initial population size is preserved. The resulting population
 is returned.
 """
-function CircuitEvolution(measurements,frequencies,generations=1,population_size=100)
-    Population = InitializePopulation(population_size)
-    Offspring = Array{RC_Circuit}(undef, population_size)
-    Progenitors = [Population[rand(1:population_size,2)] for i in 1:population_size]
-    #Generate Offspring.
-    for i in 1:population_size
-        a = true
-        Parents = Progenitors[i]
-        while a == true
-               Child = CircuitCrossover(Parents[1],Parents[2])
-               Mutant = CircuitMutation(Child)
-               if length(Mutant.parameters)>1 #We don't want univariate offspring.
-                   Offspring[i] = Mutant
-                   a = false
-               end
+function CircuitEvolution(measurements,frequencies,generations=1,population_size=30,terminals = "LRC")
+    population = Generate_population(population_size,8,3,terminals)
+    population_fitness = evaluate_fitness(population,measurements,frequencies)
+    offspring = Array{LRC_Circuit}(undef, population_size)
+    offspring_fitness = Array{Float64}(undef, population_size)
+    for i in 1:generations
+        offspring = generate_offspring(population)
+        offspring_fitness = evaluate_fitness(offspring,measurements,frequencies)
+        population, population_fitness = TruncationSelection(population,offspring,population_fitness,offspring_fitness)
     end
-    end
-    Population_fitnesses = [CircuitFitness(i,measurements,frequencies) for i in Population]
-    Offspring_fitness = [CircuitFitness(i,measurements,frequencies) for i in Offspring]
-    Total_population = vcat(Population,Offspring)
-    Total_fitness = vcat(Population_fitnesses,Offspring_fitness)
-    Selected = sortperm(Total_fitness)[1:population_size]
-    Next_generation = Total_population[Selected]
-    return Next_generation
+    return population, population_fitness
 end
