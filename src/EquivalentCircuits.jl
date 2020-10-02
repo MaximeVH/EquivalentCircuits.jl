@@ -1,6 +1,6 @@
 module EquivalentCircuits
 
-using Random, Distributions, SyntaxTree, Optim, Plots, ExprRules
+using Random, Distributions, Optim, Plots
 
 
 include("CircuitEvolution.jl")
@@ -13,8 +13,8 @@ include("OptimizeParameters.jl")
 include("RC_Circuit.jl")
 include("SimulateImpedance.jl")
 
-export InitializeCircuit, CircuitObjective, OptimizeParameters
-export InitializePopulation, CircuitEvolution
+# export InitializeCircuit, CircuitObjective, OptimizeParameters
+# export InitializePopulation, CircuitEvolution
 
 
 end
