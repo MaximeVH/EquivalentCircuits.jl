@@ -3,11 +3,11 @@ abstract type Circuit end
 mutable struct LRC_Circuit <: Circuit
     karva::String
     circuit::String
-    parameters::Array{Float64,1}
+    parameters::Array{Any,1}
     parameter_indices::Array{Int,1}
 end
 
-function Karva_to_ET(karva) #also get their arities at the same time?
+function Karva_to_ET(karva)
     level = 1
     nonterminal = true
     idx = 1
@@ -49,7 +49,7 @@ function Generate_karva(operators,terminals,head)
     return karva
 end
 
-Generate_circuit_karva(head) = Generate_karva("+-","LCR",head)
+Generate_circuit_karva(head) = Generate_karva("+-","LCRP",head)
 
 function extract_deepest_part(Tree)
     depth = ET_depth(Tree)
@@ -130,7 +130,7 @@ function number_ET(ET)
     numbered_ET = ""
     counter = 1
     for i in ET
-        if occursin(i,"LRC")
+        if occursin(i,"LRCP")
             numbered_ET *= i*string(counter)
             counter += 1
         else
@@ -144,7 +144,17 @@ end
 function denumber(expression)
     new_expression = ""
     for i in expression
-        if occursin(i,"LRC+-[],")
+        if occursin(i,"LRCP+-[],")
+            new_expression *= i
+        end
+    end
+    return new_expression
+end
+
+function extract_elements(circuit)
+    new_expression = ""
+    for i in circuit
+        if occursin(i,"LRCP")
             new_expression *= i
         end
     end
@@ -171,3 +181,56 @@ macro genfun(expr,args...); :(($(args...),)->$expr) end
 
 genfun(expr,args::Union{Vector,Tuple}) = eval(:(($(args...),)->$expr))
 genfun(expr,args::Symbol...) = genfun(expr,args)
+
+
+function Generate_circuit(max_depth,min_elements,terminals)
+    karva = "" ; ET = "" ; parameter_inds = ""
+    n_elements = 0
+    while n_elements < min_elements
+        karva = Generate_karva("+-",terminals,max_depth)
+        ET,parameter_inds = Karva_to_ET(karva)
+        n_elements = count(x->occursin(x,"PLRC"),ET)
+    end
+    parameters = karva_parameters_inclusive(karva)
+    circuit = ET_to_expression(number_ET(ET))
+    return LRC_Circuit(karva,circuit,parameters,parameter_inds)
+end
+
+
+function Generate_population(N=20,max_depth=8,min_elements=3,terminals = "LRCP")
+    return [Generate_circuit(max_depth,min_elements,terminals) for i in 1:N]
+end
+
+function to_flat_array(params)
+    new_array = Float64[]
+    for param in params
+        if length(param) == 1
+            push!(new_array,param)
+        else
+            push!(new_array,param[1])
+            push!(new_array,param[2])
+        end
+    end
+    return new_array
+end
+
+function deflatten_parameters(circuit,parameters)
+    elements = get_elements(circuit)
+    index_counter = 1
+    new_parameters = Array{Any}(undef, length(elements))
+    for (n,e) in enumerate(elements)
+        if e != 'P'
+            new_parameters[n] = parameters[index_counter]
+            index_counter += 1
+        else
+            new_parameters[n] = [parameters[index_counter],parameters[index_counter+1]]
+            index_counter += 2
+        end
+    end
+    return new_parameters
+end
+
+function get_elements(circuit)
+    elements = replace(circuit,r"[-,\[\]0-9]"=>"")
+    return elements
+end

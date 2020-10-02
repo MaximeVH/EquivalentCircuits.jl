@@ -6,11 +6,11 @@ algorithm with a population size of population_size is run for generations itera
     is applied in each generation so that the initial population size is preserved. The resulting population
 is returned.
 """
-function CircuitEvolution(measurements,frequencies,generations=1,population_size=30,terminals = "LRC")
+function CircuitEvolution(measurements,frequencies,generations=1,population_size=30,terminals = "LRCP")
     population = Generate_population(population_size,8,3,terminals)
     population_fitness = evaluate_fitness(population,measurements,frequencies)
     offspring = Array{LRC_Circuit}(undef, population_size)
-    offspring_fitness = Array{Float64}(undef, population_size)
+    offspring_fitness = Array{Float32}(undef, population_size)
     for i in 1:generations
         offspring = generate_offspring(population)
         offspring_fitness = evaluate_fitness(offspring,measurements,frequencies)
