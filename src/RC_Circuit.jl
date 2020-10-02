@@ -234,3 +234,16 @@ function get_elements(circuit)
     elements = replace(circuit,r"[-,\[\]0-9]"=>"")
     return elements
 end
+
+function Nyquist(circuit,frequencies;title=false)
+    CircuitFunc = CircuitFunction_inclusive_Final(circuit.circuit)
+    parameters = to_flat_array(circuit.parameters[circuit.parameter_indices])
+    model_output = [Base.invokelatest(CircuitFunc,parameters,fr) for fr in frequencies]
+    reals = real(model_output)
+    imags = imag(model_output)
+    if title
+        scatter(reals,-imags,title = circuit.circuit)
+    else
+        scatter(reals,-imags)
+    end
+end
