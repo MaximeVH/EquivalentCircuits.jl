@@ -30,3 +30,30 @@ function karva_parameters_inclusive(karva)
     end
     return parameters
 end
+
+function InitializeParameters(karva)
+    ranges=Dict('a'=>1000,'b'=>0.001,'c'=>1,'d'=>[100,1])
+    params = [] #preallocate this.
+    for k in karva
+        if k in ['a','b','c']
+            push!(params,rand()*ranges[k])
+        elseif k == 'd'
+            push!(params,[rand()*ranges['d'][1],rand()*ranges['d'][2]])
+        elseif k in ['e','h'] #RC
+            push!(params,[rand()*ranges['a'],rand()*ranges['b']])
+        elseif k in ['f','i'] #RL
+            push!(params,[rand()*ranges['a'],rand()*ranges['c']])
+        elseif k in ['k','m'] #CL
+            push!(params,[rand()*ranges['b'],rand()*ranges['c']])
+        elseif k in ['g','j'] #RP 
+            push!(params,[rand()*ranges['a'],[rand()*ranges['d'][1],rand()*ranges['d'][2]]])
+        elseif k in ['l','n'] #CP 
+            push!(params,[rand()*ranges['b'],[rand()*ranges['d'][1],rand()*ranges['d'][2]]])
+        elseif k == 'p' #LP 
+            push!(params,[rand()*ranges['c'],[rand()*ranges['d'][1],rand()*ranges['d'][2]]])
+        elseif k in ['+','-']
+            push!(params,0)
+        end
+    end
+    return params
+end

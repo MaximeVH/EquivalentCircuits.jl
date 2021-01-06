@@ -5,7 +5,7 @@ using Random, Distributions, Optim, Plots
 
 include("CircuitEvolution.jl")
 include("CircuitFunction.jl")
-include("CircuitObjective.jl")
+# include("CircuitObjective.jl")
 include("EvolutionOperators.jl")
 include("InitializeParameters.jl")
 include("ObjectiveFunction.jl")
@@ -15,6 +15,4 @@ include("SimulateImpedance.jl")
 
 # export InitializeCircuit, CircuitObjective, OptimizeParameters
 # export InitializePopulation, CircuitEvolution
-
-
 # end

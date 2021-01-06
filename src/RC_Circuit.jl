@@ -49,7 +49,20 @@ function Generate_karva(operators,terminals,head)
     return karva
 end
 
-Generate_circuit_karva(head) = Generate_karva("+-","LCRP",head)
+function get_parameters(circuit)
+    parameters = flatten_parameters(circuit.parameters[circuit.parameter_indices])
+return parameters
+end
+
+# Generate_circuit_karva(head) = Generate_karva("+-","LCRP",head)
+
+function Generate_circuit_karva(head,n_termns)
+    operators = "+-" 
+    terminals = "abcdefghijklmnopqrstuvwxyz"[1:n_termns]
+    all_elements = repeat(operators,n_termns)*terminals #make sure at least half of the head elements are operators, maybe this should be more?
+    karva = rand(operators)*String(rand(all_elements,head-1))*String(rand(terminals,head+1))
+    return karva
+end
 
 function extract_deepest_part(Tree)
     depth = ET_depth(Tree)
@@ -182,52 +195,113 @@ macro genfun(expr,args...); :(($(args...),)->$expr) end
 genfun(expr,args::Union{Vector,Tuple}) = eval(:(($(args...),)->$expr))
 genfun(expr,args::Symbol...) = genfun(expr,args)
 
-
-function Generate_circuit(max_depth,min_elements,terminals)
+function Generate_circuit(max_depth,min_elements,n_termns)
     karva = "" ; ET = "" ; parameter_inds = ""
     n_elements = 0
     while n_elements < min_elements
-        karva = Generate_karva("+-",terminals,max_depth)
+        karva =  Generate_circuit_karva(max_depth,n_termns)
         ET,parameter_inds = Karva_to_ET(karva)
-        n_elements = count(x->occursin(x,"PLRC"),ET)
+        n_elements = count(x->occursin(x,"abcdefghijklmnopqrstuvwxyz"),ET)
     end
-    parameters = karva_parameters_inclusive(karva)
-    circuit = ET_to_expression(number_ET(ET))
-    return LRC_Circuit(karva,circuit,parameters,parameter_inds)
+    parameters = InitializeParameters(karva)
+    # circuit = ET_to_expression(number_ET(ET))
+    return LRC_Circuit(karva,ET,parameters,parameter_inds)
 end
 
+# function Generate_circuit(max_depth,min_elements,terminals)
+#     karva = "" ; ET = "" ; parameter_inds = ""
+#     n_elements = 0
+#     while n_elements < min_elements
+#         karva = Generate_karva("+-",terminals,max_depth)
+#         ET,parameter_inds = Karva_to_ET(karva)
+#         n_elements = count(x->occursin(x,"PLRC"),ET)
+#     end
+#     parameters = karva_parameters_inclusive(karva)
+#     circuit = ET_to_expression(number_ET(ET))
+#     return LRC_Circuit(karva,circuit,parameters,parameter_inds)
+# end
 
-function Generate_population(N=20,max_depth=8,min_elements=3,terminals = "LRCP")
-    return [Generate_circuit(max_depth,min_elements,terminals) for i in 1:N]
+
+# function Generate_population(N=20,max_depth=8,min_elements=3,terminals = "LRCP")
+#     return [Generate_circuit(max_depth,min_elements,terminals) for i in 1:N]
+# end
+
+function Generate_population(N=20,max_depth=8,min_elements=3,n_terninals = 4)
+    return [Generate_circuit(max_depth,min_elements,n_terninals) for i in 1:N]
 end
 
-function to_flat_array(params)
-    new_array = Float64[]
-    for param in params
-        if length(param) == 1
-            push!(new_array,param)
-        else
-            push!(new_array,param[1])
-            push!(new_array,param[2])
+function flatten_parameters(parameters)
+    flat_params = Float64[]
+    for p in parameters
+        if length(p) == 1
+            push!(flat_params,p)
+        elseif length(p[2]) == 1
+            push!(flat_params,p[1])
+            push!(flat_params,p[2])
+        else 
+            push!(flat_params,p[1])
+            push!(flat_params,p[2][1])
+            push!(flat_params,p[2][2])
         end
     end
-    return new_array
-end
+    return flat_params
+end    
 
-function deflatten_parameters(circuit,parameters)
-    elements = get_elements(circuit)
+# function to_flat_array(params) #depricated
+#     new_array = Float64[]
+#     for param in params
+#         if length(param) == 1
+#             push!(new_array,param)
+#         else
+#             push!(new_array,param[1])
+#             push!(new_array,param[2])
+#         end
+#     end
+#     return new_array
+# end
+
+function deflatten_parameters(tree,parameters)
+    elements = extract_elements(tree)
+    deflattened = Array{Any}(undef, length(elements)) 
     index_counter = 1
-    new_parameters = Array{Any}(undef, length(elements))
     for (n,e) in enumerate(elements)
-        if e != 'P'
-            new_parameters[n] = parameters[index_counter]
-            index_counter += 1
-        else
-            new_parameters[n] = [parameters[index_counter],parameters[index_counter+1]]
+        if occursin(e,"abc")
+            deflattened[n] = parameters[index_counter]
+            index_counter +=1 
+        elseif occursin(e,"dehfikm")
+            deflattened[n] = [parameters[index_counter],parameters[index_counter+1]]
             index_counter += 2
+        else occursin(e,"gjlnp")
+            deflattened[n] = [parameters[index_counter],[parameters[index_counter+1],parameters[index_counter+2]]]
+            index_counter += 3
         end
     end
-    return new_parameters
+        return deflattened
+end
+# function deflatten_parameters(circuit,parameters)
+#     elements = get_elements(circuit)
+#     index_counter = 1
+#     new_parameters = Array{Any}(undef, length(elements))
+#     for (n,e) in enumerate(elements)
+#         if e != 'P'
+#             new_parameters[n] = parameters[index_counter]
+#             index_counter += 1
+#         else
+#             new_parameters[n] = [parameters[index_counter],parameters[index_counter+1]]
+#             index_counter += 2
+#         end
+#     end
+#     return new_parameters
+# end
+
+function extract_elements(tree)
+    elements = ""
+    for e in tree
+        if occursin(e,"abcdefghijklmnopqrstuvwxyz")
+            elements = elements*e
+        end
+    end
+    return elements
 end
 
 function get_elements(circuit)
@@ -268,3 +342,43 @@ function ET_to_circuit(tree)
     return foldl(replace,["("=>"[", ")"=>"]", "."=>","],init=tree)[2:end-1]
 end
 
+function Solve_tree(tree)
+        while occursin('[',tree)
+            tree = simplify_tree(tree)
+        end
+    expression = ""
+    counter = 1
+    for i in tree
+        if i == 'T'
+            expression = expression*"T["*string(counter)*"]"
+            counter += 1
+        elseif i == 'N'
+            expression = expression*"T["*string(counter)*"]"
+        else
+            expression = expression*i
+        end
+    end
+        return genfun(Meta.parse(expression),[:T,:f])
+end
+
+
+function simplify_tree(tree) #move the dictionaries to Solve_tree.
+    bc = Dict('a'=>"T",'b'=>"(1/(2im*π*f*"*"T"*"))",'c'=>"(2im*π*f*"*"T"*")",'d'=>"T*(2*π*f)^(-N)"*"*(cos((π*N)*0.5)-sin((π*T)*0.5)im)")
+    compound_2 = Dict("a"=>"T","b"=>"(1/(2im*π*f*"*"T"*"))","c"=>"(2im*π*f*"*"T"*")","d"=>"T*(2*π*f)^(-N)"*"*(cos((π*N)*0.5)-sin((π*T)*0.5)im)",'d'=>"T*(2*π*f)^(-N)"*"*(cos((π*N)*0.5)-sin((π*T)*0.5)im)","e"=>'('*bc['a']*'+'*bc['b']*')',"f"=>'('*bc['a']*'+'*bc['c']*')',"g"=>'('*bc['a']*'+'*bc['d']*')',"h"=>"(1/((1/"*bc['a']*")+(1/"*bc['b']*")))","i"=>"(1/((1/"*bc['a']*")+(1/"*bc['c']*")))","j"=>"(1/((1/"*bc['a']*")+(1/"*bc['d']*")))","k"=>'('*bc['b']*'+'*bc['c']*')',"l"=>'('*bc['b']*'+'*bc['d']*')',"m"=>"(1/((1/"*bc['b']*")+(1/"*bc['c']*")))","n"=>"(1/((1/"*bc['b']*")+(1/"*bc['d']*")))","o"=>'('*bc['c']*'+'*bc['d']*')',"p"=>"(1/((1/"*bc['c']*")+(1/"*bc['d']*")))")
+    m = match(r"([+-])(\[)([^\[,]+)(,)([^]\[]+)(])", tree)
+    operation,b1,arg_1,sep,arg_2,b2 = m.offsets
+    operation_,b1_,arg_1,sep_,arg_2,b2_ = m.captures
+    arg1 = haskey(compound_2,arg_1) ? compound_2[arg_1] : arg_1
+    arg2 = haskey(compound_2,arg_2) ? compound_2[arg_2] : arg_2
+    new_tree = (operation_ == '+') ? tree[1:operation-1]*arg1*'+'*arg2*tree[b2+1:end] : tree[1:operation-1]*"(1/((1/"*arg1*")+(1/"*arg2*")))"*tree[b2+1:end]
+    return new_tree
+end
+
+function get_readable_circuit(ET)
+    Circuit = ET_to_expression(ET)
+    circuit_dict = Dict('a'=>'R','b'=>'C','c'=>'L','d'=>'P','e'=>"R-C",'f'=>"R-L",'g'=>"R-P",'h'=>"[R,C]",'i'=>"[R,L]",'j'=>"[R,P]",'k'=>"C-L",'l'=>"C-P",'m'=>"[C,L]",'n'=>"[C,P]",'o'=>"L-P",'p'=>"[L,P]")
+    for k in keys(circuit_dict)
+        Circuit = replace(Circuit,k=>circuit_dict[k])
+    end
+    return Circuit
+end

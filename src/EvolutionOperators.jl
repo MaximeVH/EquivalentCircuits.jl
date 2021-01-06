@@ -119,7 +119,7 @@ of fitting the experimental data.
 #     return mutate(offspring)
 # end
 
-function circuit_offspring(circuit_1,circuit_2)
+function circuit_offspring(circuit_1,circuit_2,n_terms)
     offspring = ""
     rand_ = rand()
     if rand_ > 0.5
@@ -129,7 +129,7 @@ function circuit_offspring(circuit_1,circuit_2)
     else
         offspring = rand([circuit_1,circuit_2])
     end
-    return mutate(offspring)
+    return mutate(offspring,n_terms)
 end
 
 function CircuitFitness(circuit,measurements,frequencies)
@@ -148,12 +148,12 @@ function CircuitFitness2(circuit,measurements,frequencies)
     return deflatten_parameters(circuit.circuit,OptParams), ObjFunc(OptParams)
 end
 
-function generate_offspring(population)
+function generate_offspring(population,n_terms)
     population_size = length(population)
     progenitors = [population[rand(1:population_size,2)] for i in 1:population_size]
     offspring = Array{LRC_Circuit}(undef, population_size)
     for (e,parents) in enumerate(progenitors)
-        offspring[e] = circuit_offspring(parents[1],parents[2])
+        offspring[e] = circuit_offspring(parents[1],parents[2],n_terms)
     end
     return offspring
 end
@@ -168,6 +168,15 @@ function evaluate_fitness(population,measurements,frequencies)
     return fitnesses
 end
 
+function evaluate_fitness2(population,measurements,frequencies)
+    fitnesses = Array{Float32}(undef, length(population))
+    for (e,individual) in enumerate(population)
+        OptParams, objective = CircuitFitness2(individual,measurements,frequencies)
+        individual.parameters[individual.parameter_indices] = OptParams
+        fitnesses[e] = objective
+    end
+    return fitnesses
+end
 function TruncationSelection(population,offspring,population_fitness,offspring_fitness)
     Total_population = vcat(population,offspring)
     Total_fitness = vcat(population_fitness,offspring_fitness)
