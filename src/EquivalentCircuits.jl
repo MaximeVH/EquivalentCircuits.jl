@@ -1,4 +1,4 @@
-module EquivalentCircuits
+# module EquivalentCircuits
 
 using Random, Distributions, Optim, Plots
 
@@ -17,4 +17,4 @@ include("SimulateImpedance.jl")
 # export InitializePopulation, CircuitEvolution
 
 
-end
+# end

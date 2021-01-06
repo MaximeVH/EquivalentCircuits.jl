@@ -18,3 +18,17 @@ function CircuitEvolution(measurements,frequencies,generations=1,population_size
     end
     return population, population_fitness
 end
+
+
+function CircuitEvolution2(measurements,frequencies,generations=1,population_size=30,n_terminals=4)
+    population = Generate_population(population_size,6,3,n_terminals)
+    population_fitness = evaluate_fitness(population,measurements,frequencies)
+    offspring = Array{LRC_Circuit}(undef, population_size)
+    offspring_fitness = Array{Float32}(undef, population_size)
+    for i in 1:generations
+        offspring = generate_offspring(population)
+        offspring_fitness = evaluate_fitness(offspring,measurements,frequencies)
+        population, population_fitness = TruncationSelection(population,offspring,population_fitness,offspring_fitness)
+    end
+    return population, population_fitness
+end

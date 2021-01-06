@@ -4,7 +4,6 @@ Returns the optimal parameters for a given circuit, provided its Objective funct
 and a set of Initial_parameters (as obtained by the InitializeParameters function).
 """
 
-# Adjust upper bounds to correspond with physically acceptable values.
 
 function OptimizeParameters(Objective,Initial_parameters)
     if length(Initial_parameters) == 1
@@ -16,4 +15,11 @@ function OptimizeParameters(Objective,Initial_parameters)
     results = optimize(Objective, lower, upper, Initial_parameters, Fminbox(inner_optimizer),Optim.Options(time_limit = 20.0))
     return results.minimizer
 end
+end
+
+function OptimizeParameters2(Objective,Initial_parameters,upper)
+    lower = zeros(length(Initial_parameters))
+    inner_optimizer = NelderMead()
+    results = optimize(Objective, lower, upper, Initial_parameters, Fminbox(inner_optimizer),Optim.Options(time_limit = 20.0))
+    return results.minimizer
 end

@@ -231,7 +231,7 @@ function deflatten_parameters(circuit,parameters)
 end
 
 function get_elements(circuit)
-    elements = replace(circuit,r"[-,\[\]0-9]"=>"")
+    elements = replace(circuit,r"[+,-\[\]0-9]"=>"")
     return elements
 end
 
@@ -247,3 +247,24 @@ function Nyquist(circuit,frequencies;title=false)
         scatter(reals,-imags)
     end
 end
+
+
+####################################################################
+
+
+function circuitify_ET(tree)
+    m = match(r"([+-])(\[)([^\[,]+)(,)([^]\[]+)(])", tree)
+    operation,b1,arg_1,sep,arg_2,b2 = m.offsets
+    operation_,b1_,arg_1,sep_,arg_2,b2_ = m.captures
+    replacement = operation_ == "+" ? arg_1*'-'*arg_2 : '('*arg_1*'.'*arg_2*')'
+    return tree[1:operation-1]*replacement*tree[b2+1:end]
+end
+
+function ET_to_circuit(tree)
+    tree = '('*tree*')'
+    while '[' in tree
+        tree = circuitify_ET(tree)
+    end
+    return foldl(replace,["("=>"[", ")"=>"]", "."=>","],init=tree)[2:end-1]
+end
+
