@@ -6,11 +6,7 @@ function simulateimpedance(circuitfunc,parameters,frequencies,noise_ratio=0.01)
     impedances = [circuitfunc(parameters,fr) for fr in frequencies] 
     reals = real(impedances)
     imags = imag(impedances)
-    imepdance_measurements = Array{Any}(undef, length(frequencies))
-    for i in 1:length(impedances)
-        imepdance_measurements[i] = reals[i]+rand(Normal(0,abs(reals[i]*noise_ratio)))+imags[i]im + rand(Normal(0,abs(-imags[i]*noise_ratio)))im
-    end
-    return imepdance_measurements
+    return [R+rand(Normal(0,abs(R*noise_ratio)))+I*im + rand(Normal(0,abs(-I*noise_ratio)))im for (R,I) in zip(reals,imags)]
 end
 
 function nyquist(measurements)

@@ -238,23 +238,16 @@ function tree_to_karva(tree,head=8,terminals = "RCPL")
     return karva
 end
 
-function tree_to_circuit(tree_array) 
-    tree = copy(tree_array) 
+function tree_to_circuit(tree) 
     nodecount = length(tree)
-    essential_info = [[node.ParentIndex,node.Type,node.Index,[node.Parameter]] for node in tree]
+    essential_info = [[node.ParentIndex,node.Type,[node.Parameter]] for node in tree]
     for i in 1:((length(essential_info)-1)/2)
-        parent1,type1,index1,params1 = pop!(essential_info)
-        parent2,type2,index2,params2 = pop!(essential_info)
-        operation = essential_info[parent1][2]
-        if operation == '+'
-            essential_info[parent1][2] = type1*'-'*type2
-            essential_info[parent1][4] = vcat(params1,params2)
-        elseif operation == '-'
-            essential_info[parent1][2] = '['*type1*','*type2*']'
-            essential_info[parent1][4] = vcat(params1,params2)
-        end
+        parent1,type1,params1 = pop!(essential_info)
+        parent2,type2,params2 = pop!(essential_info)
+        essential_info[parent1][2] = essential_info[parent1][2] == '+' ? type1*'-'*type2 : '['*type1*','*type2*']'
+        essential_info[parent1][3] = vcat(params1,params2)
     end
-return  number_circuit(essential_info[1][2]),  essential_info[1][4] 
+return  number_circuit(essential_info[1][2]),  essential_info[1][3] 
 end
 
 denumber_circuit(Circuit) = replace(Circuit, r"[0-9]" => "")
@@ -502,25 +495,15 @@ function get_tree_parameters(tree)
     return [node.Parameter for node in tree]
 end
 
-function tree_to_circuit_with_inds(tree_array) 
-    tree = copy(tree_array) 
+function tree_to_circuit_with_inds(tree) 
     nodecount = length(tree)
     essential_info = [[node.ParentIndex,node.Type,node.Index,[node.Parameter]] for node in tree]
     for i in 1:((length(essential_info)-1)/2)
         parent1,type1,index1,params1 = pop!(essential_info)
         parent2,type2,index2,params2 = pop!(essential_info)
-        operation = essential_info[parent1][2]
-        if operation == '+'
-            essential_info[parent1][2] = type1*'-'*type2
-            essential_info[parent1][4] = vcat(params1,params2)
-            essential_info[parent1][3] = vcat(index1,index2)
-
-        elseif operation == '-'
-            essential_info[parent1][2] = '['*type1*','*type2*']'
-            essential_info[parent1][4] = vcat(params1,params2)
-            essential_info[parent1][3] = vcat(index1,index2)
-
-        end
+        essential_info[parent1][2] = essential_info[parent1][2] == '+' ? type1*'-'*type2 : '['*type1*','*type2*']'
+        essential_info[parent1][4] = vcat(params1,params2)
+        essential_info[parent1][3] = vcat(index1,index2)
     end
 return  number_circuit(essential_info[1][2]),  essential_info[1][4] , essential_info[1][3]
 end
