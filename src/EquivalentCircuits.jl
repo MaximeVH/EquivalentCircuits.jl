@@ -1,20 +1,17 @@
 module EquivalentCircuits
 
-using Random, Distributions, Optim, Plots
+using Random, Combinatorics, FunctionWrappers, Distributions, Optim, Plots
+import Base: isless
 
-
-include("CircuitEvolution.jl")
+include("Circuits.jl") 
 include("CircuitFunction.jl")
-include("CircuitObjective.jl")
 include("EvolutionOperators.jl")
-include("InitializeParameters.jl")
 include("ObjectiveFunction.jl")
 include("OptimizeParameters.jl")
-include("RC_Circuit.jl")
 include("SimulateImpedance.jl")
+include("CircuitEvolution.jl")
 
-# export InitializeCircuit, CircuitObjective, OptimizeParameters
-# export InitializePopulation, CircuitEvolution
 
+export circuitevolution
 
 end
