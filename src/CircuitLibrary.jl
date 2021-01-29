@@ -13,6 +13,7 @@ function loadpopulation(filepath)
     population_array = readdlm(filepath,';')
     population_size = size(population_array,1)
     population = Array{Circuit}(undef,population_size)
+    cpe_indices = findall(x->typeof(x)==SubString{String},population_array[:,:])
     population_array[cpe_indices[size(population_array,1)+1:end]] = eval.(Meta.parse.(population_array[cpe_indices[population_size+1:end]]))
     for individual in 1:population_size
         population[individual] = Circuit(population_array[individual,1],vcat(population_array[individual,3:end]),population_array[individual,2] == Inf ? nothing : population_array[individual,2])

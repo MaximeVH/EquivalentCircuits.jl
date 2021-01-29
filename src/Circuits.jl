@@ -411,7 +411,7 @@ function get_parent_inds_from_tournamant(pop_size,fitnesses,elite_size)
     tournament_size = Int(ceil(0.1*pop_size))
     for i in 1:mating_pool_size
     tournament = rand(1:pop_size,tournament_size)
-    max_,ind = findmax(fitnesses[tournament])
+    max_,ind = findmin(fitnesses[tournament])
     push!(parents,tournament[ind])
     end
     return parents

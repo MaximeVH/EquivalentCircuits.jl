@@ -2,6 +2,7 @@ module EquivalentCircuits
 
 using Random, Combinatorics, FunctionWrappers, Distributions, Optim, Plots
 import Base: isless
+import Base: length
 
 include("Circuits.jl") 
 include("CircuitFunction.jl")

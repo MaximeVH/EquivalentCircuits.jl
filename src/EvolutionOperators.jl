@@ -57,7 +57,7 @@ function tournamentselection(population,fitnesses,elite_size)
     tournament_size = elite_size
     for i in 1:mating_pool_size
         tournament = rand(1:population_size,tournament_size)
-        max_,ind = findmax(fitnesses[tournament])
+        max_,ind = findmin(fitnesses[tournament])
         push!(selected,tournament[ind])
     end
     return selected
