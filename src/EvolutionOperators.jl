@@ -10,7 +10,7 @@ end
 function two_point_crossover(circuit1,circuit2)
     karva1 = circuit1.karva
     karva2 = circuit2.karva
-    crossover_points = sort(rand(1:length(karva1)-1,2)) #if the two crossover points are the same, no crossing over occurs and the first circuit is returned.
+    crossover_points = sort(rand(1:length(karva1)-1,2))
     new_karva = karva1[1:crossover_points[1]]*karva2[crossover_points[1]+1:crossover_points[2]]*karva1[crossover_points[2]+1:end] 
     new_parameters = vcat(circuit1.parameters[1:crossover_points[1]],circuit2.parameters[crossover_points[1]+1:crossover_points[2]],circuit1.parameters[crossover_points[2]+1:end])
     return Circuit(new_karva,new_parameters,nothing)
@@ -50,15 +50,11 @@ function multipoint_mutation(circuit,N,terminals="RCLP")
     return circuit
 end
 
-function tournamentselection(population,fitnesses,elite_size)
+function tournamentselection(population,mating_pool_size,tournament_size)
     selected = []
-    population_size = length(population)
-    mating_pool_size = population_size - elite_size
-    tournament_size = elite_size
     for i in 1:mating_pool_size
-        tournament = rand(1:population_size,tournament_size)
-        max_,ind = findmin(fitnesses[tournament])
-        push!(selected,tournament[ind])
+        tournament = rand(population,tournament_size)
+        push!(selected,minimum(tournament))
     end
     return selected
 end

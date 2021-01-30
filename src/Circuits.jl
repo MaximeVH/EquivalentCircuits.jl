@@ -14,6 +14,7 @@ struct TreeNode{I<:Integer,P<:Real}
 end
 
 isless(a::TreeNode, b::TreeNode) = isless(a.Index, b.Index)
+isless(a::Circuit, b::Circuit) = isless(a.fitness, b.fitness) 
 
 function number_circuit(circuit)
     l_positions = findall(isterminal ,circuit) 
@@ -511,7 +512,7 @@ end
 function nyquist(circuit::Circuit)
     tree = get_circuit_tree(circuit)
     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
-    frequencies = frequencies = [10.0^i for i in LinRange(-1, 5, 50)];
+    frequencies = [10.0^i for i in LinRange(-1, 5, 50)];
     impedances = simulateimpedance_noiseless(circfunc,params,frequencies)
     scatter(real(impedances),-imag(impedances),title = tree_to_circuit(tree)[1])
 end
