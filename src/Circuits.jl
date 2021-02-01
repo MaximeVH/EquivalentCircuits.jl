@@ -183,31 +183,43 @@ function descendents(Tree,Node)
     end
 end
 
-function get_removal_parameters(tree) 
+function get_removal_parameters(tree) #in order not to miss hierarchically higher series operations: first do an upward search of the tree going up parents with a while loop as long as only serial operators (so no parallel operator) are encountered.
     components_to_remove_params = []
     parallel_detection = false
-    for component in listcomponents(tree)
+    components = listcomponents(tree)
+    if length(tree) == 3
+        return components_to_remove_params
+    end
+    for component in components
         component_type = component.Type
         Parent = tree[component.ParentIndex]
         parentoperation = Parent.Type
-        if parentoperation == '+' && !(component.Parameter in components_to_remove_params)
+        if !(component.Parameter in components_to_remove_params)
             sibling = Parent.Child1Index == component.Index ? tree[Parent.Child2Index] : tree[Parent.Child1Index]
             sibling_decendents = descendents(tree,sibling)
             descendant_counter = 1
             while !parallel_detection && descendant_counter <= length(sibling_decendents)
-                if sibling_decendents[descendant_counter].Type == component_type
+                if sibling_decendents[descendant_counter].Type == '-' 
+                    parallel_detection = true
+                elseif sibling_decendents[descendant_counter].Type == component_type
                     push!(components_to_remove_params,sibling_decendents[descendant_counter].Parameter)
-                elseif sibling_decendents[descendant_counter].Type == '-'
-                    parallel_detection == true
                 end
                 descendant_counter += 1
             end
         end
+        parallel_detection = false
     end
-    return components_to_remove_params
+    if length(components_to_remove_params) + 1 == length(components)
+        return []
+    else
+        return components_to_remove_params
+    end
 end
 
-function simplifycircuit(tree)
+function simplifycircuit(tree) #one-elemwent circuits should be avoided. tree::Array{TreeNode,1}
+    if length(tree) == 3
+        return tree
+    end
     simplified = false
     while !simplified
         removal_parameters = get_removal_parameters(tree)
@@ -215,12 +227,52 @@ function simplifycircuit(tree)
             simplified = true
         else
             for P in removal_parameters
+                if length(tree) > 3
                 component = tree[findfirst(x->x.Parameter == P,tree)]
                 tree = removecomponent(tree,component)
+                end
             end
         end
     end
     return tree
+end
+
+function simplifycircuit(circuit::Circuit)
+    if count(isoperation,circuit.karva[1:3]) == 1
+        return circuit
+    end
+    circuit_coding_length = length(circuit.karva)
+    initialtree = karva_to_tree(circuit.karva,circuit.parameters)
+    tree = simplifycircuit(initialtree)
+    if tree == initialtree
+        return circuit
+    end
+    rest_karva = circuit.karva[length(initialtree):end]
+    rest_parameters = circuit.parameters[length(initialtree):end]
+    extra_karva = join(rand("RCLP",circuit_coding_length-length(tree)-length(rest_karva)))
+    extra_parameters = karva_parameters(extra_karva) 
+    return Circuit(join([node.Type for node in tree])*rest_karva*extra_karva,vcat(get_tree_parameters(tree),rest_parameters,extra_parameters),nothing)
+end
+
+function simplifycircuit!(circuit::Circuit) 
+    if count(isoperation,circuit.karva[1:3]) != 1
+        circuit_coding_length = length(circuit.karva)
+        initialtree = karva_to_tree(circuit.karva,circuit.parameters)
+        tree = simplifycircuit(initialtree)
+        if tree != initialtree
+            rest_karva = circuit.karva[length(initialtree):end]
+            rest_parameters = circuit.parameters[length(initialtree):end]
+            extra_karva = join(rand("RCLP",circuit_coding_length-length(tree)-length(rest_karva)))
+            extra_parameters = karva_parameters(extra_karva) 
+            circuit.karva, circuit.parameters =  join([node.Type for node in tree])*rest_karva*extra_karva, vcat(get_tree_parameters(tree),rest_parameters,extra_parameters)
+        end
+    end
+end
+
+
+function readablecircuit(circuit::Circuit)
+    tree = karva_to_tree(circuit.karva,circuit.parameters)
+    return tree_to_circuit(tree)[1]
 end
 
 function subtrees(tree) 

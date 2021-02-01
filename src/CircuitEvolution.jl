@@ -16,6 +16,12 @@ function initializevariedpopulation(size=30,head=8)
     return vcat(RCs,RCLs,RCLPs)
 end
 
+function simplifypopulation!(population)
+    for circuit in population
+        simplifycircuit!(circuit)
+    end
+end
+
 function circuit_offspring(circuit_1,circuit_2,terminals = "RCLP")
     offspring = ""
     rand_ = rand()
@@ -60,13 +66,24 @@ function evaluate_fitness!(population,measurements,frequencies)
 end
 
 function circuitevolution(measurements,frequencies,generations=1,population_size=30,terminals = "RCLP",head=8)
-    population = initializepopulation(population_size,head,terminals) 
+    population = initializepopulation(population_size,head,terminals)
+    simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
     for i in 1:generations
         population = generate_offspring(population)
+        simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
     end
     return population
+end
+
+function circuitevolution(filepath,generations=1,population_size=30,terminals = "RCLP",head=8)
+    meansurement_file = readdlm(filepath,',')
+    reals = meansurement_file[:,1]
+    imags = meansurement_file[:,2]
+    freqs = meansurement_file[:,3]
+    measurements = reals + imags*im
+    return circuitevolution(measurements,frequencies,generations,population_size,terminals,head=)
 end
