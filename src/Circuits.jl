@@ -188,15 +188,6 @@ function readablecircuit(circuit::Circuit)
     return tree_to_circuit(tree)[1]
 end
 
-function subtrees(tree) 
-    trees = []
-    components = listcomponents(tree)
-    for component in components
-        push!(trees,removecomponent(tree,component))
-    end
-    return trees
-end
-
 function tree_to_karva(tree,head=8,terminals = "RCPL")
     coding_karva = join([node.Type for node in tree])
     remaining_length = 2*head+1 - length(coding_karva)

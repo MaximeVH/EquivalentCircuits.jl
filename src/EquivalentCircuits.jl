@@ -12,6 +12,7 @@ include("OptimizeParameters.jl")
 include("SimulateImpedance.jl")
 include("CircuitSimplification.jl")
 include("CircuitLibrary.jl")
+include("RedundancyTesting.jl")
 include("CircuitEvolution.jl")
 
 
