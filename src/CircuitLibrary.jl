@@ -6,7 +6,7 @@ function savepopulation(fname,population)
         for (n,circuit) in enumerate(population)
             array[n,:] = vcat([circuit.karva,circuit.fitness == nothing ? Inf : circuit.fitness],circuit.parameters)
         end
-        writedlm(fname,Circuit_Population,';')
+        writedlm(fname,array,';')
 end
 
 function loadpopulation(filepath)
