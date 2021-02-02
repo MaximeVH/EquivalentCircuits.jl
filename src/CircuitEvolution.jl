@@ -66,7 +66,7 @@ function evaluate_fitness!(population,measurements,frequencies)
 end
 
 function circuitevolution(measurements,frequencies,generations=1,population_size=30,terminals = "RCLP",head=8)
-    population = initializepopulation(population_size,head,terminals)
+    population = initializevariedpopulation(population_size,head)#initializepopulation(population_size,head,terminals)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
@@ -76,6 +76,7 @@ function circuitevolution(measurements,frequencies,generations=1,population_size
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
     end
+    replace_redundant_cpes!(population)
     return population
 end
 
@@ -83,7 +84,46 @@ function circuitevolution(filepath,generations=1,population_size=30,terminals = 
     meansurement_file = readdlm(filepath,',')
     reals = meansurement_file[:,1]
     imags = meansurement_file[:,2]
-    freqs = meansurement_file[:,3]
+    frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
-    return circuitevolution(measurements,frequencies,generations,population_size,terminals,head=)
+    return circuitevolution(measurements,frequencies,generations,population_size,terminals,head)
+end
+
+function circuitevolution(measurements,frequencies,initialpopulation,generations=1)
+    population = initialpopulation
+    simplifypopulation!(population) 
+    evaluate_fitness!(population,measurements,frequencies)
+    sort!(population)
+    for i in 1:generations
+        population = generate_offspring(population)
+        simplifypopulation!(population)
+        evaluate_fitness!(population,measurements,frequencies)
+        sort!(population)
+    end
+    replace_redundant_cpes!(population)
+    return population
+end
+
+function circuitevolution(measurements,frequencies,populationfile,generations=1)
+    population = loadpopulation(populationfile)
+    simplifypopulation!(population) 
+    evaluate_fitness!(population,measurements,frequencies)
+    sort!(population)
+    for i in 1:generations
+        population = generate_offspring(population)
+        simplifypopulation!(population)
+        evaluate_fitness!(population,measurements,frequencies)
+        sort!(population)
+    end
+    replace_redundant_cpes!(population)
+    return population
+end
+
+function visualizesolutions(measurements,population)
+    fig = scatter(real(measurements),-imag(measurements), label = "impedance measurements",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:topleft)
+    for n in 1:10
+        a = simulateimpedance_noiseless(population[n],freqs)
+        scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
+    end
+    return fig
 end

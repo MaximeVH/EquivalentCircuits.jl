@@ -1,6 +1,6 @@
 module EquivalentCircuits
 
-using Random, Combinatorics, FunctionWrappers, Distributions, Optim, Plots
+using Random, Combinatorics, FunctionWrappers, DelimitedFiles, Distributions, Optim, Plots
 import Base: isless
 import Base: length
 
@@ -10,6 +10,8 @@ include("EvolutionOperators.jl")
 include("ObjectiveFunction.jl")
 include("OptimizeParameters.jl")
 include("SimulateImpedance.jl")
+include("CircuitSimplification.jl")
+include("CircuitLibrary.jl")
 include("CircuitEvolution.jl")
 
 
