@@ -14,8 +14,8 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 julia = "1"
-Combinatorics = "1.0"
-Distributions = "0.24"
+Combinatorics = "1.0" 
+Distributions = "0.23, 0.24"
 FunctionWrappers = "1.1"
 Optim = "0.18"
 Plots = "1.4"
