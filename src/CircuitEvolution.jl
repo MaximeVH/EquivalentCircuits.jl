@@ -43,7 +43,7 @@ function circuitfitness(circuit,measurements,frequencies)
     return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds 
 end
 
-function generate_offspring(population)
+function generate_offspring(population,terminals="RCLP")
     population_size = length(population)
     elite_size = Int(ceil(0.1*population_size))
     mating_pool_size = population_size-elite_size
@@ -51,7 +51,7 @@ function generate_offspring(population)
     elites = population[1:elite_size]
     offspring = Array{Circuit}(undef, mating_pool_size)
     for e in 1:mating_pool_size
-        offspring[e] = circuit_offspring(progenitors[e],progenitors[mating_pool_size-e+1])
+        offspring[e] = circuit_offspring(progenitors[e],progenitors[mating_pool_size-e+1],terminals)
     end
     vcat(elites,offspring)
 end
@@ -66,12 +66,12 @@ function evaluate_fitness!(population,measurements,frequencies)
 end
 
 function circuitevolution(measurements,frequencies,generations=1,population_size=30,terminals = "RCLP",head=8)
-    population = initializevariedpopulation(population_size,head)#initializepopulation(population_size,head,terminals)
+    population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
     for i in 1:generations
-        population = generate_offspring(population)
+        population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
@@ -89,13 +89,13 @@ function circuitevolution(filepath,generations=1,population_size=30,terminals = 
     return circuitevolution(measurements,frequencies,generations,population_size,terminals,head)
 end
 
-function circuitevolution(measurements,frequencies,initialpopulation,generations=1)
+function circuitevolution(measurements,frequencies,initialpopulation,generations=1,terminals = "RCLP")
     population = initialpopulation
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
     for i in 1:generations
-        population = generate_offspring(population)
+        population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
@@ -104,13 +104,13 @@ function circuitevolution(measurements,frequencies,initialpopulation,generations
     return population
 end
 
-function circuitevolution(measurements,frequencies,populationfile,generations=1)
+function circuitevolution(measurements,frequencies,populationfile,generations=1,terminals = "RCLP")
     population = loadpopulation(populationfile)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
     for i in 1:generations
-        population = generate_offspring(population)
+        population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)

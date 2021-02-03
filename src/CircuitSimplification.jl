@@ -52,7 +52,7 @@ function simplifycircuit(tree)
     return tree
 end
 
-function simplifycircuit(circuit::Circuit)
+function simplifycircuit(circuit::Circuit,terminals="RCPL")
     if count(isoperation,circuit.karva[1:3]) == 1
         return circuit
     end
@@ -64,12 +64,12 @@ function simplifycircuit(circuit::Circuit)
     end
     rest_karva = circuit.karva[length(initialtree):end]
     rest_parameters = circuit.parameters[length(initialtree):end]
-    extra_karva = join(rand("RCLP",circuit_coding_length-length(tree)-length(rest_karva)))
+    extra_karva = join(rand(terminals,circuit_coding_length-length(tree)-length(rest_karva)))
     extra_parameters = karva_parameters(extra_karva) 
     return Circuit(join([node.Type for node in tree])*rest_karva*extra_karva,vcat(get_tree_parameters(tree),rest_parameters,extra_parameters),nothing)
 end
 
-function simplifycircuit!(circuit::Circuit) 
+function simplifycircuit!(circuit::Circuit,terminals="RCPL") 
     if count(isoperation,circuit.karva[1:3]) != 1
         circuit_coding_length = length(circuit.karva)
         initialtree = karva_to_tree(circuit.karva,circuit.parameters)
@@ -77,7 +77,7 @@ function simplifycircuit!(circuit::Circuit)
         if tree != initialtree
             rest_karva = circuit.karva[length(initialtree):end]
             rest_parameters = circuit.parameters[length(initialtree):end]
-            extra_karva = join(rand("RCLP",circuit_coding_length-length(tree)-length(rest_karva)))
+            extra_karva = join(rand(terminals,circuit_coding_length-length(tree)-length(rest_karva)))
             extra_parameters = karva_parameters(extra_karva) 
             circuit.karva, circuit.parameters =  join([node.Type for node in tree])*rest_karva*extra_karva, vcat(get_tree_parameters(tree),rest_parameters,extra_parameters)
         end
