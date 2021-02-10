@@ -65,7 +65,7 @@ function evaluate_fitness!(population,measurements,frequencies)
     end 
 end
 
-function circuitevolution(measurements,frequencies,generations=1,population_size=30,terminals = "RCLP",head=8)
+function circuitevolution(measurements,frequencies,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
     population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
@@ -80,7 +80,7 @@ function circuitevolution(measurements,frequencies,generations=1,population_size
     return population
 end
 
-function circuitevolution(filepath,generations=1,population_size=30,terminals = "RCLP",head=8)
+function circuitevolution(filepath::String,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
     meansurement_file = readdlm(filepath,',')
     reals = meansurement_file[:,1]
     imags = meansurement_file[:,2]
@@ -89,7 +89,7 @@ function circuitevolution(filepath,generations=1,population_size=30,terminals = 
     return circuitevolution(measurements,frequencies,generations,population_size,terminals,head)
 end
 
-function circuitevolution(measurements,frequencies,initialpopulation,generations=1,terminals = "RCLP")
+function circuitevolution(measurements,frequencies,initialpopulation::Array{Circuit,1},generations::Real=1,terminals = "RCLP")
     population = initialpopulation
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
@@ -104,7 +104,7 @@ function circuitevolution(measurements,frequencies,initialpopulation,generations
     return population
 end
 
-function circuitevolution(measurements,frequencies,populationfile,generations=1,terminals = "RCLP")
+function circuitevolution(measurements,frequencies,populationfile::String,generations::Real=1,terminals = "RCLP")
     population = loadpopulation(populationfile)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
@@ -119,10 +119,10 @@ function circuitevolution(measurements,frequencies,populationfile,generations=1,
     return population
 end
 
-function visualizesolutions(measurements,population)
-    fig = scatter(real(measurements),-imag(measurements), label = "impedance measurements",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:topleft)
-    for n in 1:10
-        a = simulateimpedance_noiseless(population[n],freqs)
+function visualizesolutions(measurements,frequencies,population)
+    fig = scatter(real(measurements),-imag(measurements), label = "impedance measurements",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
+    for n in 1:5
+        a = simulateimpedance_noiseless(population[n],frequencies)
         scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
     end
     return fig
