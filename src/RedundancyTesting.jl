@@ -1,5 +1,5 @@
 function subcircuits(circuit,terminals = "RCLP") #externally avoid 2-component circuits to be input.
-    subcircs = []; karva = ""; parameters = []; 
+    subcircs = Circuit[]; karva = ""; parameters = []; 
     sublength = 0
     coding_length = length(circuit.karva)
     tree = karva_to_tree(circuit.karva,circuit.parameters)
@@ -22,14 +22,39 @@ function subtrees(tree)
     return trees
 end
 
-function redundacy_testing(circuit,measurements,frequencies,cutoffratio = 0.95)
+function redundacy_testing(circuit,measurements,frequencies,cutoffratio = 0.80)
     subcircs = subcircuits(circuit)
     evaluate_fitness!(subcircs,measurements,frequencies)
-    candidate = max(subcircs)
+    candidate = minimum(subcircs)
     fitnessratio = circuit.fitness/candidate.fitness
     if fitnessratio >= cutoffratio
         return candidate
     else
         return circuit
     end
+end
+
+function get_subcircuits(circuit,measurements,frequencies)
+    subcircs = subcircuits(circuit)
+    evaluate_fitness!(subcircs,measurements,frequencies)
+    return subcircs
+end
+
+function removeredundancy(circuit,measurements,frequencies,cutoff = 0.80) #the function should also terminate when a circuit consists of only two elements.
+    if count(isoperation,circuit.karva[1:3]) == 1
+        return circuit
+    end
+    subcircs = get_subcircuits(circuit,measurements,frequencies)
+    candidate = minimum(subcircs)
+    redundancy = true
+    while redundancy && count(isoperation,circuit.karva[1:3])>1
+        if circuit.fitness/candidate.fitness > cutoff
+            circuit = candidate
+        else 
+            redundancy = false
+        end
+        subcircs = get_subcircuits(circuit,measurements,frequencies)
+        candidate = minimum(subcircs)
+    end
+    return circuit
 end
