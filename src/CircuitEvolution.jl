@@ -40,6 +40,7 @@ function circuitfitness(circuit,measurements,frequencies)
     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
     objective = objectivefunction(circfunc,measurements,frequencies)
     optparams,fitness = optimizeparameters(objective,params,upper)
+    optparams = max.(min.(optparams,upper),0) #workaround of optim.jl's bug
     return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds 
 end
 
@@ -80,6 +81,26 @@ function circuitevolution(measurements,frequencies,generations::Real=1,populatio
     return population
 end
 
+function circuitevolution(measurements,frequencies,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
+    population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+    simplifypopulation!(population) 
+    evaluate_fitness!(population,measurements,frequencies)
+    sort!(population)
+    for i in 1:generations
+        population = generate_offspring(population,terminals)
+        simplifypopulation!(population)
+        evaluate_fitness!(population,measurements,frequencies)
+        sort!(population)
+        population[1] = redundacy_testing(population[1],measurements,frequencies)
+    end
+    replace_redundant_cpes!(population)
+    population = removeduplicates(population)
+    for i in 1:3
+        population[i] = removeredundancy(population[i],measurements,frequencies)
+    end
+    return population
+end
+
 function circuitevolution(filepath::String,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
     meansurement_file = readdlm(filepath,',')
     reals = meansurement_file[:,1]
@@ -89,7 +110,7 @@ function circuitevolution(filepath::String,generations::Real=1,population_size=3
     return circuitevolution(measurements,frequencies,generations,population_size,terminals,head)
 end
 
-function circuitevolution(measurements,frequencies,initialpopulation::Array{Circuit,1},generations::Real=1,terminals = "RCLP")
+function circuitevolution(measurements,frequencies,initialpopulation::Array{Circuit,1},generations::Real=1,terminals = "RCLP") #
     population = initialpopulation
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
@@ -101,10 +122,14 @@ function circuitevolution(measurements,frequencies,initialpopulation::Array{Circ
         sort!(population)
     end
     replace_redundant_cpes!(population)
+    population = removeduplicates(population)
+    for i in 1:3
+        population[i] = removeredundancy(population[i],measurements,frequencies)
+    end
     return population
 end
 
-function circuitevolution(measurements,frequencies,populationfile::String,generations::Real=1,terminals = "RCLP")
+function circuitevolution(measurements,frequencies,populationfile::String,generations::Real=1,terminals = "RCLP") #
     population = loadpopulation(populationfile)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
@@ -116,6 +141,10 @@ function circuitevolution(measurements,frequencies,populationfile::String,genera
         sort!(population)
     end
     replace_redundant_cpes!(population)
+    population = removeduplicates(population)
+    for i in 1:3
+        population[i] = removeredundancy(population[i],measurements,frequencies)
+    end
     return population
 end
 
@@ -127,3 +156,14 @@ function visualizesolutions(measurements,frequencies,population)
     end
     return fig
 end
+
+function visualizesolutions(circuit::Circuit,frequencies,population)
+    measurements = simulateimpedance_noiseless(circuit,frequencies)
+    fig = scatter(real(measurements),-imag(measurements), label = "ground truth: $(readablecircuit(circuit))",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
+    for n in 1:3
+        a = simulateimpedance_noiseless(population[n],frequencies)
+        scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
+    end
+    return fig
+end
+
