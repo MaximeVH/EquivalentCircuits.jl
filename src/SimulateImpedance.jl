@@ -23,5 +23,5 @@ function simulateimpedance(circuit::Circuit,frequencies,noise_ratio=0.01)
 end
 
 function nyquist(measurements)
-    scatter(real(measurements),imag(measurements))
+    scatter(real(measurements),-imag(measurements))
 end

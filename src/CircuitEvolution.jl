@@ -76,21 +76,6 @@ function circuitevolution(measurements,frequencies,generations::Real=1,populatio
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
-    end
-    replace_redundant_cpes!(population)
-    return population
-end
-
-function circuitevolution(measurements,frequencies,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
-    population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
-    simplifypopulation!(population) 
-    evaluate_fitness!(population,measurements,frequencies)
-    sort!(population)
-    for i in 1:generations
-        population = generate_offspring(population,terminals)
-        simplifypopulation!(population)
-        evaluate_fitness!(population,measurements,frequencies)
-        sort!(population)
         population[1] = redundacy_testing(population[1],measurements,frequencies)
     end
     replace_redundant_cpes!(population)

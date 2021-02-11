@@ -1,9 +1,9 @@
 function get_parameter_upper_bound(tree)
-    ranges = Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) #Dict('R'=>5000,'C'=>0.001,'L'=>1,'P'=>[100,1],'+'=>0,'-'=>0) 
+    ranges = Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) #Dict('R'=>5000,'C'=>0.001,'L'=>1,'P'=>[100,1],'+'=>0,'-'=>0) , Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0)
     return [ranges[node.Type] for node in tree]
 end
 
-function get_parameter_upper_bound(readablecircuit)
+function get_parameter_upper_bound(readablecircuit::String)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(readablecircuit))
     ranges = Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) #Dict('R'=>5000,'C'=>0.001,'L'=>1,'P'=>[100,1],'+'=>0,'-'=>0) 
     return flatten([ranges[e] for e in elements])
@@ -32,7 +32,7 @@ function parameteroptimisation(circuit,measurements,frequencies) #add another me
         objective = objectivefunction(circfunc,measurements,frequencies)
     #   get bounds.
         lower = zeros(length(initial_parameters))
-        upper = get_parameter_upper_bound()
+        upper = get_parameter_upper_bound(circuit)
     #   optimize.
         inner_optimizer = NelderMead()
         results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 20.0))
