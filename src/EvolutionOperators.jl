@@ -39,7 +39,7 @@ function mutate(circuit,terminals = "RCLP")
 end
 
 function replacementparameter(element)
-    ranges= Dict('R'=>1000,'C'=>0.001,'L'=>1,'P'=>[100,1],'+'=>0,'-'=>0)
+    ranges= Dict('R'=>1000,'C'=>0.001,'L'=>1,'P'=>[100,0.99999],'+'=>0,'-'=>0)
     return rand().*ranges[element]
 end
 
@@ -50,6 +50,19 @@ function multipoint_mutation(circuit,N,terminals="RCLP")
     return circuit
 end
 
+function transposition(circuit)
+    parameters = copy(circuit.parameters)
+    coding_length = length(circuit.karva)
+    startsite = random(2:coding_length)
+    max_transposonlength = coding_length-startsite
+    transposonlength = random(1:max_transposonlength)
+    targetsite = random(2:startsite)
+    mutable_karva = collect(circuit.karva)
+    mutable_karva[targetsite:targetsite+transposonlength] = mutable_karva[startsite:startsite+transposonlength]
+    parameters[targetsite:targetsite+transposonlength] = parameters[startsite:startsite+transposonlength]
+    return  Circuit(String(mutable_karva),parameters,nothing)
+end
+
 function tournamentselection(population,mating_pool_size,tournament_size)
     selected = []
     for i in 1:mating_pool_size
@@ -57,4 +70,9 @@ function tournamentselection(population,mating_pool_size,tournament_size)
         push!(selected,minimum(tournament))
     end
     return selected
+end
+
+function truncationselection(population,truncation_size)
+    sort!(population)
+    return population[1:truncation_size]
 end
