@@ -88,7 +88,8 @@ function add_to_circuitlibrary(circuit,type = "N",source = "no information provi
     writedlm("Circuitmetadata.csv",metadatalibrary,';')
 end
 
-function add_encoding_to_circuitlibrary(circuit_code,circuit_parameters,type = "N",source = "no information provided.") 
+function add_encoding_to_circuitlibrary(circuit_code,type = "N",source = "no information provided.") 
+    circuit_parameters = karva_parameters(circuit_code)
     additional_codings = join(rand("RCLP",17-length(circuit_code))) #assuming a headlength of 8.
     addidional_parameters = karva_parameters(additional_codings)
     karva = circuit_code*additional_codings
@@ -105,4 +106,28 @@ function add_encoding_to_circuitlibrary(circuit_code,circuit_parameters,type = "
      #save the circuitlibrary files.
      savepopulation("Circuitlibrary.csv",circuitlibrary)
      writedlm("Circuitmetadata.csv",metadatalibrary,';')
+end
+
+function add_encoding_to_circuitlibrary_with_parameters(circuit_code,parameters,type = "N",source = "no information provided.") 
+    additional_codings = join(rand("RCLP",17-length(circuit_code))) #assuming a headlength of 8.
+    addidional_parameters = karva_parameters(additional_codings)
+    karva = circuit_code*additional_codings
+    parameters = vcat(circuit_parameters,addidional_parameters)
+    circuitlibrary = loadpopulation("CircuitLibrary.csv")
+    metadatalibrary = readdlm("circuitmetadata.csv",';')
+    circuitobject = Circuit(karva,parameters,nothing)
+    push!(circuitlibrary,circuitobject)
+    circuitmetadata = Array{Any}(undef,1,4)
+    tree =  karva_to_tree(circuit_code,circuit_parameters)
+    circuit,parameters_ = tree_to_circuit(tree)
+    circuitmetadata[1:4] = [circuit,parameters_,type,source]
+    metadatalibrary = vcat(metadatalibrary,circuitmetadata)
+     #save the circuitlibrary files.
+     savepopulation("Circuitlibrary.csv",circuitlibrary)
+     writedlm("Circuitmetadata.csv",metadatalibrary,';')
+end
+
+function circuitparameters(circuit)
+    elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
+    return karva_parameters(elements)
 end
