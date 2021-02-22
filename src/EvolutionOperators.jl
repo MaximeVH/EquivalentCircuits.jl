@@ -53,10 +53,10 @@ end
 function transposition(circuit)
     parameters = copy(circuit.parameters)
     coding_length = length(circuit.karva)
-    startsite = random(2:coding_length)
+    startsite = rand(2:coding_length-1)
     max_transposonlength = coding_length-startsite
-    transposonlength = random(1:max_transposonlength)
-    targetsite = random(2:startsite)
+    transposonlength = rand(1:max_transposonlength)
+    targetsite = rand(2:startsite)
     mutable_karva = collect(circuit.karva)
     mutable_karva[targetsite:targetsite+transposonlength] = mutable_karva[startsite:startsite+transposonlength]
     parameters[targetsite:targetsite+transposonlength] = parameters[startsite:startsite+transposonlength]
