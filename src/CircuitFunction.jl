@@ -1,8 +1,3 @@
-genfun(expr,args::Union{Vector,Tuple}) = eval(:(($(args...),)->$expr)) |> FunctionWrappers.FunctionWrapper{Any, Tuple{Array{Float64,1},Float64}}
-genfun(expr,args::Symbol...) = genfun(expr,args) |> FunctionWrappers.FunctionWrapper{Any, Tuple{Array{Float64,1},Float64}}
-genfun(expr,args::Union{Vector,Tuple}) = eval(:(($(args...),)->$expr)) |> FunctionWrappers.FunctionWrapper{Any, Tuple{Array{Any,1},Float64}}
-genfun(expr,args::Symbol...) = genfun(expr,args) |> FunctionWrappers.FunctionWrapper{Any, Tuple{Array{Any,1},Float64}}
-
 function circuitfunction(Circuit)
     for (f,t) in zip(["-","[",",","]"],["+","((",")^-1+(",")^-1)^-1"])
         Circuit=replace(Circuit,f=>t)
@@ -36,7 +31,7 @@ for i in Circuit
 end
 
     Circuit_expression = Meta.parse(new_circuit)
-    return genfun(Circuit_expression,[:T,:f])
+    return mk_function([:T,:f],[],Circuit_expression)
 end
 
 function tree_to_function(tree_array)
@@ -57,10 +52,11 @@ function tree_to_function(tree_array)
         end
     end
     CircuitExpression = Meta.parse(essential_info[1][2])
-return genfun(CircuitExpression,[:T,:f])
+return mk_function([:T,:f],[],CircuitExpression)
 end
 
-karva_to_function(karva) = tree_to_function(karva_to_tree(karva))
+karva_to_function(karva::String) = tree_to_function(karva_to_tree(karva))
+karva_to_function(circuit::Circuit) = karva_to_function(circuit.karva)
 
 function flatten(params)
     new_array = Float64[]

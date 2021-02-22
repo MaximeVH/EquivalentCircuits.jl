@@ -1,7 +1,9 @@
 module EquivalentCircuits
+
     export circuitevolution
     export parameteroptimisation
-    using Random, Combinatorics, FunctionWrappers, DelimitedFiles, Distributions, Optim, Plots
+    export initialize_circuitlibrary, add_to_circuitlibrary, add_encoding_to_circuitlibrary
+    using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim, Plots
     import Base: isless, length
 
     include("Circuits.jl") 
@@ -14,4 +16,5 @@ module EquivalentCircuits
     include("CircuitLibrary.jl")
     include("RedundancyTesting.jl")
     include("CircuitEvolution.jl")
+
 end
