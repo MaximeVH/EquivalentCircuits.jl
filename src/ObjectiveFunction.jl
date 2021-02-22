@@ -40,3 +40,28 @@ function objectivefunction4(circuitfunc,measurements,frequencies) #fitness measu
     return objective
 end
 
+function objectivefunction5(circuitfunc,measurements,frequencies) #fitness measure from Lempka et al.
+    function objective(x)
+        model_output = [circuitfunc(x,fr) for fr in frequencies] 
+        rme,ime,rmo,imo = real(measurements),imag(measurements),real(model_output),imag(model_output)
+        return sum(((rme.-rmo).^2)./(rmo.^2 .+rme.^2) .+ ((ime.-imo).^2)./(imo.^2 .+rme.^2))
+    end
+    return objective
+end
+
+function objectivefunction6(circuitfunc,measurements,frequencies) #fitness measure from Lempka et al.
+    function objective(x)
+        model_output = [circuitfunc(x,fr) for fr in frequencies] 
+        rme,ime,rmo,imo = real(measurements),imag(measurements),real(model_output),imag(model_output)
+        return sum(((rme.-rmo).^2)./(rmo.^2) .+ ((ime.-imo).^2)./(imo.^2)) 
+    end
+    return objective
+end
+
+function objectivefunction7(circuitfunc,measurements,frequencies)
+    function objective(x)
+        model_output = [circuitfunc(x,fr) for fr in frequencies] 
+        return  mean((abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2 ))
+    end
+    return objective
+end
