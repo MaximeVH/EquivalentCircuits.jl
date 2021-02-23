@@ -24,7 +24,7 @@ end
 
 function redundacy_testing(circuit,measurements,frequencies,cutoffratio = 0.80)
     subcircs = subcircuits(circuit)
-    evaluate_fitness!(subcircs,measurements,frequencies)
+    evaluate_fitness!(subcircs,measurements,frequencies) #customiszable version required in experiments.
     candidate = minimum(subcircs)
     fitnessratio = circuit.fitness/candidate.fitness
     if fitnessratio >= cutoffratio
@@ -36,18 +36,18 @@ end
 
 function get_subcircuits(circuit,measurements,frequencies)
     subcircs = subcircuits(circuit)
-    evaluate_fitness!(subcircs,measurements,frequencies)
+    evaluate_fitness!(subcircs,measurements,frequencies) #customiszable version required in experiments.
     return subcircs
 end
 
-function removeredundancy(circuit,measurements,frequencies,cutoff = 0.80) #the function should also terminate when a circuit consists of only two elements.
+function removeredundancy(circuit,measurements,frequencies,cutoff = 0.80)
     if count(isoperation,circuit.karva[1:3]) == 1
         return circuit
     end
     subcircs = get_subcircuits(circuit,measurements,frequencies)
     candidate = minimum(subcircs)
     redundancy = true
-    while redundancy && count(isoperation,circuit.karva[1:3])>1
+    while redundancy && count(isoperation,candidate.karva[1:3])>1
         if circuit.fitness/candidate.fitness > cutoff
             circuit = candidate
         else 
