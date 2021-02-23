@@ -106,3 +106,9 @@ function replace_redundant_cpes!(population::Array{Circuit,1})
         replace_redundant_cpes!(circuit)
     end
 end
+
+function removeduplicates(population::Array{Circuit,1})
+    unique_inds = findfirst.(isequal.(unique(fitnesses)), [fitnesses])
+    unique_population = population[unique_inds]
+    return unique_population
+end
