@@ -84,11 +84,11 @@ function simplifycircuit!(circuit::Circuit,terminals="RCPL")
     end
 end
 
-function replace_redundant_cpes!(circuit::Circuit)
+function replace_redundant_cpes!(circuit::Circuit) 
     cpe_positions = findall(x->x=='P',circuit.karva)
     mutable_karva = split(circuit.karva,"")
     for position in cpe_positions
-        if circuit.parameters[position][2] > 0.99 #threshold to be adjusted. Capacitor replacement.
+        if circuit.parameters[position][2] > 0.99 && (1/(circuit.parameters[position][1]) < 10) #threshold to be adjusted. Capacitor replacement. Second condition avoids 
             mutable_karva[position] = "C"
             circuit.parameters[position] = 1/(circuit.parameters[position][1])
         elseif circuit.parameters[position][2] < 0.01 #threshold to be adjusted. Resistor replacement.
@@ -108,6 +108,7 @@ function replace_redundant_cpes!(population::Array{Circuit,1})
 end
 
 function removeduplicates(population::Array{Circuit,1})
+    fitnesses = [p.fitness for p in population]
     unique_inds = findfirst.(isequal.(unique(fitnesses)), [fitnesses])
     unique_population = population[unique_inds]
     return unique_population
