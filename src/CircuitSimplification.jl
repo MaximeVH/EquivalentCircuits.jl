@@ -113,3 +113,41 @@ function removeduplicates(population::Array{Circuit,1})
     unique_population = population[unique_inds]
     return unique_population
 end
+
+function Terminalnode_replacement(oldtree, oldnode::TreeNode, new_type::Char)
+    @assert occursin(new_type,"RCLP") "invalid terminal provided."
+    tree = copy(oldtree)
+    new_parameter = karva_parameters(new_type)[1]
+    tree[oldnode.Index] = TreeNode(oldnode.Index, oldnode.ParentIndex,
+     oldnode.Child1Index, oldnode.Child2Index, new_type,new_parameter)
+    return tree
+end
+
+function CPE_replacements(circuit::Circuit)
+    tree = get_circuit_tree(circuit)
+    CPE_nodes = tree[findall(x->x.Type=='P',tree)]
+    if isempty(CPE_nodes)
+        return circuit
+    end
+    replacement_tree = ""
+    replacement_circuits = []#Array{Circuit}(undef,2*length(CPE_nodes))
+    for new_type in ['R','C']
+        for CPE_node in CPE_nodes
+        replacement_tree = Terminalnode_replacement(tree, CPE_node, new_type)
+        push!(replacement_circuits,Circuit(tree_to_karva(replacement_tree),
+        get_tree_parameters(replacement_tree),nothing))
+        end
+    end
+
+    return replacement_circuits
+end
+
+function CPE_testing(circuit::Circuit,measurements,frequencies,cutoff = 0.8)
+    replacement_circuits = CPE_replacements(circuit)
+    evaluate_fitness!(replacement_circuits,measurements,frequencies)
+    if circuit.fitness/minimum(replacement_circuits).fitness >= cutoff
+        return minimum(replacement_circuits)
+    else
+        return circuit
+    end
+end
