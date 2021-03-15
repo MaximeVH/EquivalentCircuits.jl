@@ -5,7 +5,15 @@ impedance for a given set of circuit parameters at a specified range of experime
 This function is used to optimize the circuit parameters.
 
 """
-function objectivefunction(circuitfunc,measurements,frequencies) #fitness measure from Ramos et al.
+function objectivefunction(circuitfunc,measurements,frequencies) 
+    function objective(x)
+        model_output = [circuitfunc(x,fr) for fr in frequencies] 
+        return  mean((abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2))
+    end
+    return objective
+end
+
+function objectivefunction1(circuitfunc,measurements,frequencies) #fitness measure from Ramos et al.
     function objective(x)
         model_output = [circuitfunc(x,fr) for fr in frequencies] 
         return  mean((abs.(measurements - model_output).^2)./(abs.(model_output).^2))
@@ -56,12 +64,12 @@ function objectivefunction6(circuitfunc,measurements,frequencies) #fitness measu
         return sum(((rme.-rmo).^2)./(rmo.^2) .+ ((ime.-imo).^2)./(imo.^2)) 
     end
     return objective
-end
+end 
 
 function objectivefunction7(circuitfunc,measurements,frequencies)
     function objective(x)
         model_output = [circuitfunc(x,fr) for fr in frequencies] 
-        return  mean((abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2 ))
+        return  mean((abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2))
     end
     return objective
-end
+end 
