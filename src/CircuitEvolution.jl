@@ -16,9 +16,9 @@ function initializevariedpopulation(size=30,head=8)
     return vcat(RCs,RCLs,RCLPs)
 end
 
-function simplifypopulation!(population)
+function simplifypopulation!(population,terminals="RCPL")
     for circuit in population
-        simplifycircuit!(circuit)
+        simplifycircuit!(circuit,terminals)
     end
 end
 
@@ -71,15 +71,21 @@ function circuitevolution(measurements,frequencies,generations::Real=1,populatio
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
-    for i in 1:generations
+    generation = 0
+    convergence_threshold = 5e-4 
+    elite = minimum(population)
+    min_fitness = elite.fitness
+    while (min_fitness > convergence_threshold) && (generation<=max_generations)
         population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
-        population[1] = redundacy_testing(population[1],measurements,frequencies)
+        elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+        min_fitness = elite.fitness
+        generation += 1
     end
     replace_redundant_cpes!(population)
-    population = removeduplicates(population)
+    population = removeduplicates(sort!(vcat(population,elite)))
     for i in 1:3
         population[i] = removeredundancy(population[i],measurements,frequencies)
     end
@@ -100,33 +106,47 @@ function circuitevolution(measurements,frequencies,initialpopulation::Array{Circ
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
-    for i in 1:generations
+    generation = 0
+    convergence_threshold = 5e-4 
+    elite = minimum(population)
+    min_fitness = elite.fitness
+    while (min_fitness > convergence_threshold) && (generation<=max_generations)
         population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
+        elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+        min_fitness = elite.fitness
+        generation += 1
     end
     replace_redundant_cpes!(population)
-    population = removeduplicates(population)
+    population = removeduplicates(sort!(vcat(population,elite)))
     for i in 1:3
         population[i] = removeredundancy(population[i],measurements,frequencies)
     end
     return population
 end
 
-function circuitevolution(measurements,frequencies,populationfile::String,generations::Real=1,terminals = "RCLP") #
+function circuitevolution(measurements,frequencies,populationfile::String,generations::Real=10,terminals = "RCLP") #
     population = loadpopulation(populationfile)
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
-    for i in 1:generations
+    generation = 0
+    convergence_threshold = 5e-4 
+    elite = minimum(population)
+    min_fitness = elite.fitness
+    while (min_fitness > convergence_threshold) && (generation<=max_generations)
         population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
+        elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+        min_fitness = elite.fitness
+        generation += 1
     end
     replace_redundant_cpes!(population)
-    population = removeduplicates(population)
+    population = removeduplicates(sort!(vcat(population,elite)))
     for i in 1:3
         population[i] = removeredundancy(population[i],measurements,frequencies)
     end
