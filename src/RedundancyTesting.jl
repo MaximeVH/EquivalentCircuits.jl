@@ -22,8 +22,8 @@ function subtrees(tree)
     return trees
 end
 
-function redundacy_testing(circuit,measurements,frequencies,cutoffratio = 0.80)
-    subcircs = subcircuits(circuit)
+function redundacy_testing(circuit,measurements,frequencies,terminals = "RCLP",cutoffratio = 0.80)
+    subcircs = subcircuits(circuit,terminals)
     evaluate_fitness!(subcircs,measurements,frequencies) #customiszable version required in experiments.
     candidate = minimum(subcircs)
     fitnessratio = circuit.fitness/candidate.fitness
@@ -34,17 +34,17 @@ function redundacy_testing(circuit,measurements,frequencies,cutoffratio = 0.80)
     end
 end
 
-function get_subcircuits(circuit,measurements,frequencies)
-    subcircs = subcircuits(circuit)
+function get_subcircuits(circuit,measurements,frequencies,terminals = "RCLP")
+    subcircs = subcircuits(circuit,terminals)
     evaluate_fitness!(subcircs,measurements,frequencies) #customiszable version required in experiments.
     return subcircs
 end
 
-function removeredundancy(circuit,measurements,frequencies,cutoff = 0.80)
+function removeredundancy(circuit,measurements,frequencies,terminals = "RCPL",cutoff = 0.80)
     if count(isoperation,circuit.karva[1:3]) == 1
         return circuit
     end
-    subcircs = get_subcircuits(circuit,measurements,frequencies)
+    subcircs = get_subcircuits(circuit,measurements,frequencies,terminals)
     candidate = minimum(subcircs)
     redundancy = true
     while redundancy && count(isoperation,candidate.karva[1:3])>1
@@ -53,7 +53,7 @@ function removeredundancy(circuit,measurements,frequencies,cutoff = 0.80)
         else 
             redundancy = false
         end
-        subcircs = get_subcircuits(circuit,measurements,frequencies)
+        subcircs = get_subcircuits(circuit,measurements,frequencies,terminals)
         candidate = minimum(subcircs)
     end
     return circuit
