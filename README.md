@@ -17,7 +17,8 @@ The package can be installed using the package manager.
 
 ## Usage
 ### Circuit notation
-Equivalent electrical circuit models are composed of electrical elements, connected in series or in parallel. The four fundamental elements that are most commonly encountered in equivalent electrical circuits, are resistors, capacitors, inductors and constant phase elements. These four elements are represented by the capital letters R, C, L and P, respectively. serially connected elements have dashes between them, wereas parallely connected elements are placed between square brackets and separated by a comma. Finally all the elements in a circuit are numbered. Using these notation rules, the circuit `R1-[C2,R3-[C4,R5]]` corresponds to: ![](example_circuit.png)
+Equivalent electrical circuit models are composed of electrical elements, connected in series or in parallel. The four fundamental elements that are most commonly encountered in equivalent electrical circuits, are resistors, capacitors, inductors and constant phase elements. These four elements are represented by the capital letters R, C, L and P, respectively. serially connected elements have dashes between them, wereas parallely connected elements are placed between square brackets and separated by a comma. Finally all the elements in a circuit are numbered. Using these notation rules, the circuit `R1-[C2,R3-[C4,R5]]` corresponds to:
+![](example_circuit.png)
 
 ### Parameter fitting
 When an appropriate circuit model is available, the parameters can be fitted to experimental data using the `parameteroptimisation(circuit,data)` function. the `circuit`argument is the equivalent circuit, provided as a string with the circuit notation displayed above. The electrochemical impedance measurement data can be provided as a CSV file with three columns: imaginary impedance, real impedance and frequency (see example_measurements.csv).
