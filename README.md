@@ -18,6 +18,7 @@ The package can be installed using the package manager.
 ## Usage
 ### Circuit notation
 Equivalent electrical circuit models are composed of electrical elements, connected in series or in parallel. The four fundamental elements that are most commonly encountered in equivalent electrical circuits, are resistors, capacitors, inductors and constant phase elements. These four elements are represented by the capital letters R, C, L and P, respectively. serially connected elements have dashes between them, wereas parallely connected elements are placed between square brackets and separated by a comma. Finally all the elements in a circuit are numbered. Using these notation rules, the circuit `R1-[C2,R3-[C4,R5]]` corresponds to:
+
 ![](example_circuit.png)
 
 ### Parameter fitting
