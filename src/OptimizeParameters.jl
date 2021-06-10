@@ -23,6 +23,10 @@ function optimizeparameters(objective,initial_parameters,upper)
     return results.minimizer,results.minimum 
 end
 
+"""
+    parameteroptimisation(circuit,measurements,frequencies)
+fits the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
+"""
 function parameteroptimisation(circuit,measurements,frequencies) #add another method where initial parameters are given.
     #   generate initial parameters.
         elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))

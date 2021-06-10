@@ -66,6 +66,15 @@ function evaluate_fitness!(population,measurements,frequencies)
     end 
 end
 
+"""
+    circuitevolution(filepath::String;kwargs)
+A function that does gene expression programming-based circuit identification, based on an input CSV file of measurements and 
+frequencies. The possible keyword agruments to tune the cirucit identification are: generations (the maximum number of algorithm
+iterations), population_size, terminals (the circuit components that are to be included in the circuit identification), head 
+(a measure for the considered circuit complexity), initial population (the option to provide an initial population of circuits
+with which the algorithm starts).
+"""
+
 function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population = nothing)
     meansurement_file = readdlm(filepath,',')
     reals = meansurement_file[:,1]
@@ -102,6 +111,15 @@ function circuitevolution(filepath::String;generations::Real=10,population_size=
     return readablecircuit.(population[1:5])
 end
 
+"""
+    circuitevolution(measurements,frequencies)
+A function that does gene expression programming-based circuit identification, based on an input complex array of measurements 
+and an array of frequencies. The possible keyword agruments to tune the cirucit identification are: generations (the maximum number of algorithm
+iterations), population_size, terminals (the circuit components that are to be included in the circuit identification), head 
+(a measure for the considered circuit complexity), initial population (the option to provide an initial population of circuits
+with which the algorithm starts).
+
+"""
 function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population=nothing)
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
