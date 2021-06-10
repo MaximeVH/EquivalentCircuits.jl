@@ -150,22 +150,22 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
         return readablecircuit.(population[1:5])
     end
 
-function visualizesolutions(measurements,frequencies,population)
-    fig = scatter(real(measurements),-imag(measurements), label = "impedance measurements",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
-    for n in 1:5
-        a = simulateimpedance_noiseless(population[n],frequencies)
-        scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
-    end
-    return fig
-end
+# function visualizesolutions(measurements,frequencies,population)
+#     fig = scatter(real(measurements),-imag(measurements), label = "impedance measurements",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
+#     for n in 1:5
+#         a = simulateimpedance_noiseless(population[n],frequencies)
+#         scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
+#     end
+#     return fig
+# end
 
-function visualizesolutions(circuit::Circuit,frequencies,population)
-    measurements = simulateimpedance_noiseless(circuit,frequencies)
-    fig = scatter(real(measurements),-imag(measurements), label = "ground truth: $(readablecircuit(circuit))",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
-    for n in 1:3
-        a = simulateimpedance_noiseless(population[n],frequencies)
-        scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
-    end
-    return fig
-end
+# function visualizesolutions(circuit::Circuit,frequencies,population)
+#     measurements = simulateimpedance_noiseless(circuit,frequencies)
+#     fig = scatter(real(measurements),-imag(measurements), label = "ground truth: $(readablecircuit(circuit))",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
+#     for n in 1:3
+#         a = simulateimpedance_noiseless(population[n],frequencies)
+#         scatter!(real(a),-imag(a),label = "$(n).  $(readablecircuit(population[n]))")
+#     end
+#     return fig
+# end
 

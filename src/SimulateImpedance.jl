@@ -22,6 +22,6 @@ function simulateimpedance(circuit::Circuit,frequencies,noise_ratio=0.01)
     return [R+rand(Normal(0,abs(R*noise_ratio)))+I*im + rand(Normal(0,abs(-I*noise_ratio)))im for (R,I) in zip(reals,imags)]
 end
 
-function nyquist(measurements)
-    scatter(real(measurements),-imag(measurements))
-end
+# function nyquist(measurements)
+#     scatter(real(measurements),-imag(measurements))
+# end
