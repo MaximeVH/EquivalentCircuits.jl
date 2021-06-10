@@ -66,43 +66,18 @@ function evaluate_fitness!(population,measurements,frequencies)
     end 
 end
 
-function circuitevolution(measurements,frequencies,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
-    population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
-    simplifypopulation!(population) 
-    evaluate_fitness!(population,measurements,frequencies)
-    sort!(population)
-    generation = 0
-    convergence_threshold = 5e-4 
-    elite = minimum(population)
-    min_fitness = elite.fitness
-    while (min_fitness > convergence_threshold) && (generation<=max_generations)
-        population = generate_offspring(population,terminals)
-        simplifypopulation!(population)
-        evaluate_fitness!(population,measurements,frequencies)
-        sort!(population)
-        elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
-        min_fitness = elite.fitness
-        generation += 1
-    end
-    replace_redundant_cpes!(population)
-    population = removeduplicates(sort!(vcat(population,elite)))
-    for i in 1:3
-        population[i] = removeredundancy(population[i],measurements,frequencies)
-    end
-    return population
-end
-
-function circuitevolution(filepath::String,generations::Real=1,population_size=30,terminals = "RCLP",head=8)
+function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population = nothing)
     meansurement_file = readdlm(filepath,',')
     reals = meansurement_file[:,1]
     imags = meansurement_file[:,2]
     frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
-    return circuitevolution(measurements,frequencies,generations,population_size,terminals,head)
-end
-
-function circuitevolution(measurements,frequencies,initialpopulation::Array{Circuit,1},generations::Real=1,terminals = "RCLP") #
-    population = initialpopulation
+    # population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+    if isnothing(initial_population)    
+        population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+    else
+        population = initial_population
+    end
     simplifypopulation!(population) 
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
@@ -110,7 +85,7 @@ function circuitevolution(measurements,frequencies,initialpopulation::Array{Circ
     convergence_threshold = 5e-4 
     elite = minimum(population)
     min_fitness = elite.fitness
-    while (min_fitness > convergence_threshold) && (generation<=max_generations)
+    while (min_fitness > convergence_threshold) && (generation<=generations)
         population = generate_offspring(population,terminals)
         simplifypopulation!(population)
         evaluate_fitness!(population,measurements,frequencies)
@@ -124,34 +99,38 @@ function circuitevolution(measurements,frequencies,initialpopulation::Array{Circ
     for i in 1:3
         population[i] = removeredundancy(population[i],measurements,frequencies)
     end
-    return population
+    return readablecircuit.(population[1:5])
 end
 
-function circuitevolution(measurements,frequencies,populationfile::String,generations::Real=10,terminals = "RCLP") #
-    population = loadpopulation(populationfile)
-    simplifypopulation!(population) 
-    evaluate_fitness!(population,measurements,frequencies)
-    sort!(population)
-    generation = 0
-    convergence_threshold = 5e-4 
-    elite = minimum(population)
-    min_fitness = elite.fitness
-    while (min_fitness > convergence_threshold) && (generation<=max_generations)
-        population = generate_offspring(population,terminals)
-        simplifypopulation!(population)
+function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population=nothing)
+    if isnothing(initial_population)  
+        population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+    else
+        population = initial_population
+    end
+        simplifypopulation!(population) 
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
-        elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+        generation = 0
+        convergence_threshold = 5e-4 
+        elite = minimum(population)
         min_fitness = elite.fitness
-        generation += 1
+        while (min_fitness > convergence_threshold) && (generation<=generations)
+            population = generate_offspring(population,terminals)
+            simplifypopulation!(population)
+            evaluate_fitness!(population,measurements,frequencies)
+            sort!(population)
+            elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+            min_fitness = elite.fitness
+            generation += 1
+        end
+        replace_redundant_cpes!(population)
+        population = removeduplicates(sort!(vcat(population,elite)))
+        for i in 1:3
+            population[i] = removeredundancy(population[i],measurements,frequencies)
+        end
+        return readablecircuit.(population[1:5])
     end
-    replace_redundant_cpes!(population)
-    population = removeduplicates(sort!(vcat(population,elite)))
-    for i in 1:3
-        population[i] = removeredundancy(population[i],measurements,frequencies)
-    end
-    return population
-end
 
 function visualizesolutions(measurements,frequencies,population)
     fig = scatter(real(measurements),-imag(measurements), label = "impedance measurements",markershape = :diamond,markersize = 8, title = "Top evolved circuits",legend=:outertopright,size = (1000, 500))
