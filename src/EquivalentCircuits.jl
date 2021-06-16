@@ -3,7 +3,7 @@ module EquivalentCircuits
     export circuitevolution
     export parameteroptimisation
     export initialize_circuitlibrary, add_to_circuitlibrary, add_encoding_to_circuitlibrary
-    using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim, Plots
+    using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim
     import Base: isless, length
 
     include("Circuits.jl") 
