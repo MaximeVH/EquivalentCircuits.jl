@@ -1,3 +1,6 @@
+#Running this code will take a while, it is included here for illustration purposed. The resulting circuit library CSV file (Circuitlibrary.csv) can already conveniently
+#be found in the root folder.
+
 initialize_circuitlibrary("R1-[C2,R3-[C4,R5]]",[20,4e-9,3400,4e-6,2500],"Nonbiological","https://www.gamry.com/application-notes/EIS/basics-of-electrochemical-impedance-spectroscopy/")
 add_to_circuitlibrary("[R1,[C2,R3]-R4]",[4310,3.5e-9,2.9e6,220],"Biological","Electrical Impedance Studies on Potato and Alfalfa Tissue, Hayden et al")
 add_to_circuitlibrary("[R1,C2-[R3,C4-R5]]",[7355,5.11e-9,3274,5e-9,346],"Biological","Electrical Impedance Analysis in Plant Tissues: A Double Shell Model, Zhang et al")
