@@ -75,7 +75,7 @@ iterations), population_size, terminals (the circuit components that are to be i
 with which the algorithm starts).
 """
 
-function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population = nothing)
+function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population = nothing,top_n = 1)
     meansurement_file = readdlm(filepath,',')
     reals = meansurement_file[:,1]
     imags = meansurement_file[:,2]
@@ -108,7 +108,16 @@ function circuitevolution(filepath::String;generations::Real=10,population_size=
     for i in 1:3
         population[i] = removeredundancy(population[i],measurements,frequencies)
     end
-    return readablecircuit.(population[1:5])
+    # extract the converged circuits.
+    population = filter(p -> p.fitness ≤ convergence_threshold, population)
+    # adjust top_n so that it can't be larger than the number of converged circuits.
+    top_n = min(top_n,length(population))
+    # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
+    if top_n == 0
+        println("Algorithm did not converge")
+    else
+        return readablecircuit.(population[1:top_n]) 
+    end
 end
 
 """
@@ -120,7 +129,7 @@ iterations), population_size, terminals (the circuit components that are to be i
 with which the algorithm starts).
 
 """
-function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population=nothing)
+function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population=nothing,top_n=1)
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     else
@@ -147,7 +156,16 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
         for i in 1:3
             population[i] = removeredundancy(population[i],measurements,frequencies)
         end
-        return readablecircuit.(population[1:5])
+        # extract the converged circuits.
+        population = filter(p -> p.fitness ≤ convergence_threshold, population)
+        # adjust top_n so that it can't be larger than the number of converged circuits.
+        top_n = min(top_n,length(population))
+        # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
+        if top_n == 0
+            println("Algorithm did not converge")
+        else
+            return readablecircuit.(population[1:top_n]) 
+        end
     end
 
 # function visualizesolutions(measurements,frequencies,population)
