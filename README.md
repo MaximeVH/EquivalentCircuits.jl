@@ -34,15 +34,15 @@ using CSV, DataFrames
 
 #Load the measurement data.
 
-data = "example_measurements.csv"
+data = "example_measurements.csv"; #This should be the filepath of the example_measurements.csv file.
 
-df = CSV.read("example_measurements.csv",DataFrame,header = false) 
+df = CSV.read("example_measurements.csv",DataFrame,header = false);
 
 #Rename the columns for illustration purposes.
 
-rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies")
+rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies");
 
-rename!(df, rename_dict)
+rename!(df, rename_dict);
 
 println(df)
 
@@ -84,8 +84,9 @@ circuitevolution("example_measurements.csv",terminals="RC")
 Next, the file [Circuitlibrary.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/Circuitlibrary.csv) contains a collection of various circuit topologies. We can allow the algorithm to start from this circuit collection as initial population as follows:
 
 ```julia
-# Load the population from the CSV file, using the loadpopulation function
-circuit_library = loadpopulation(Circuitlibrary.csv);
+# Load the population from the CSV file, using the loadpopulation function.
+# The input of the loadpopulation should be the filepath of Circuitpopulation.csv.
+circuit_library = loadpopulation("Circuitlibrary.csv"); #The input should be the filepath of the Circuitlibrary.csv file.
 
 # Now find a circuit that fits the data, starting from the initial population of circuits
 circuitevolution("example_measurements.csv",initial_population = circuit_library)
