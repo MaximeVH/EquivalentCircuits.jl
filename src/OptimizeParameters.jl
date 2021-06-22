@@ -43,6 +43,28 @@ function parameteroptimisation(circuit,measurements,frequencies) #add another me
         return deflatten_parameters(results.minimizer,circuit)
 end
 
+function parameteroptimisation(circuit::String,data::String) #add another method where initial parameters are given.
+        meansurement_file = readdlm(data,',')
+        # convert the measurement data into usable format.
+        reals = meansurement_file[:,1]
+        imags = meansurement_file[:,2]
+        frequencies = meansurement_file[:,3]
+        measurements = reals + imags*im
+    #   generate initial parameters.
+        elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
+        initial_parameters = flatten(karva_parameters(elements))
+    #   get circuitfunction and objective.
+        circfunc = circuitfunction(circuit)
+        objective = objectivefunction(circfunc,measurements,frequencies)
+    #   get bounds.
+        lower = zeros(length(initial_parameters))
+        upper = get_parameter_upper_bound(circuit)
+    #   optimize.
+        inner_optimizer = NelderMead()
+        results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 20.0))
+        return deflatten_parameters(results.minimizer,circuit)
+end
+
 function deflatten_parameters(parameters,tree,param_inds)
     correct_value_lengths = length.(get_tree_parameters(tree)[param_inds])
     correct_length = length(correct_value_lengths)

@@ -148,3 +148,33 @@ function circuitparameters(circuit,limited_params)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
     return karva_parameters3(elements,limited_params)
 end
+
+function karva_parameters2(karva) 
+    parameters = Array{Float64}(undef, length(karva))
+    ranges = Dict('R'=>4000,'C'=> 0.0001,'L'=> 1,'+'=> 0,'-'=> 0,'P'=>[4000,1])
+    for (e,i) in enumerate(karva)
+            if e == 'P'
+                Element_values[n] = [ranges[e][1]*rand(),ranges[e][2]*rand()]
+            else
+            parameters[e] = rand()*ranges[i]
+        end
+    end
+    return parameters
+end
+
+function karva_parameters3(karva,limited_params) 
+    parameters = Array{Any}(undef, length(karva))
+    ranges = Dict('R'=>4000,'C'=> 0.0001,'L'=> 1,'+'=> 0,'-'=> 0,'P'=>[4000,1])
+    for (e,(i,l)) in enumerate(zip(karva,limited_params))
+            if l != 0
+                parameters[e] = l
+            else
+                if i == 'P'
+                    Element_values[e] = [ranges[i][1]*rand(),ranges[i][2]*rand()]
+                else
+                parameters[e] = rand()*ranges[i]
+            end
+        end
+    end
+    return parameters
+end
