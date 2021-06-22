@@ -40,7 +40,7 @@ df = CSV.read("example_measurements.csv",DataFrame,header = false)
 
 #Rename the columns for illustration purposes.
 
-rename_dict = Dict("Column1"=>"Frequency","Column2"=>"Real","Column3"=>"Imag")
+rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies")
 
 rename!(df, rename_dict)
 
@@ -50,7 +50,7 @@ println(df)
 
 Next we can fit the parameters of our example ciruit to the example measurement data as follows:
 ```julia
-circuitparameters = parameteroptimisation(circuit,data)
+circuitparams = parameteroptimisation(circuit,data)
 ```
 
 ### Circuit fitting
