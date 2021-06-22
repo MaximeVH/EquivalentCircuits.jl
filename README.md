@@ -16,6 +16,8 @@ Equivalent electrical circuit models are composed of electrical elements, connec
 
 When using this package, the circuit should input as a String:  
 ```julia
+using EquivalentCircuits
+
 circuit = "R1-[C2,R3-[C4,R5]]"
 ```
 
