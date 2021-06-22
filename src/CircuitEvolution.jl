@@ -75,25 +75,32 @@ iterations), population_size, terminals (the circuit components that are to be i
 with which the algorithm starts).
 """
 
-function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population = nothing,top_n = 1)
+function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing,top_n = 1)
+    # Read the measurement file.
     meansurement_file = readdlm(filepath,',')
+    # convert the measurement data into usable format.
     reals = meansurement_file[:,1]
     imags = meansurement_file[:,2]
     frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
-    # population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+    # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)    
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     else
         population = initial_population
     end
+    # Theoretical simplification of the initial population.
     simplifypopulation!(population) 
+    # Calculate the fitness for each individual in the population and sort the population by fitness.
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
     generation = 0
     convergence_threshold = 5e-4 
+    # Keep track of the fittest individual circuit.
     elite = minimum(population)
     min_fitness = elite.fitness
+    # apply genetic operators and tournament selection to obtain new generations of circuits
+    # as long as none of the termination criteria are satisfied.
     while (min_fitness > convergence_threshold) && (generation<=generations)
         population = generate_offspring(population,terminals)
         simplifypopulation!(population)
@@ -101,12 +108,14 @@ function circuitevolution(filepath::String;generations::Real=10,population_size=
         sort!(population)
         elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
         min_fitness = elite.fitness
+        population[1] = redundacy_testing(population[1],measurements,frequencies,terminals,cutoff)
         generation += 1
     end
+    # Convert CPEs with second parameter equal to 0 or 1 to capacitor or resistor.
     replace_redundant_cpes!(population)
     population = removeduplicates(sort!(vcat(population,elite)))
     for i in 1:3
-        population[i] = removeredundancy(population[i],measurements,frequencies)
+        population[i] = removeredundancy(population[i],measurements,frequencies,terminals,cutoff)
     end
     # extract the converged circuits.
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
@@ -129,17 +138,21 @@ iterations), population_size, terminals (the circuit components that are to be i
 with which the algorithm starts).
 
 """
-function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,initial_population=nothing,top_n=1)
+# This method is identical to the previous one, apart from a different way of inputting the impedance measurements and frequencies.
+function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,top_n=1)
+    # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     else
         population = initial_population
     end
+    # Theoretical simplification of the initial population.
         simplifypopulation!(population) 
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
         generation = 0
         convergence_threshold = 5e-4 
+        # Keep track of the fittest individual circuit.
         elite = minimum(population)
         min_fitness = elite.fitness
         while (min_fitness > convergence_threshold) && (generation<=generations)
@@ -149,12 +162,13 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
             sort!(population)
             elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
             min_fitness = elite.fitness
+            population[1] = redundacy_testing(population[1],measurements,frequencies,terminals,cutoff)
             generation += 1
         end
         replace_redundant_cpes!(population)
         population = removeduplicates(sort!(vcat(population,elite)))
         for i in 1:3
-            population[i] = removeredundancy(population[i],measurements,frequencies)
+            population[i] = removeredundancy(population[i],measurements,frequencies,terminals,cutoff)
         end
         # extract the converged circuits.
         population = filter(p -> p.fitness ≤ convergence_threshold, population)
