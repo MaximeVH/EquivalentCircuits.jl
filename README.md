@@ -34,15 +34,15 @@ using CSV, DataFrames
 
 #Load the measurement data.
 
-data = "example_measurements.csv"
+data = "example_measurements.csv"; #This should be the filepath of the example_measurements.csv file.
 
-df = CSV.read("example_measurements.csv",DataFrame,header = false) 
+df = CSV.read("example_measurements.csv",DataFrame,header = false);
 
 #Rename the columns for illustration purposes.
 
-rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies")
+rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies");
 
-rename!(df, rename_dict)
+rename!(df, rename_dict);
 
 println(df)
 
@@ -54,7 +54,7 @@ circuitparams = parameteroptimisation(circuit,data)
 ```
 
 ### Circuit fitting
-When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be obtained using the `circuitevolution(data;kwargs)` function. The data can once again be provided as CSV file. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
+When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be obtained using the `circuitevolution(data;kwargs)` function. The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
 
 - `generations` : the maximum number of algorithm iterations.
 - `population_size` : the number of individuals in the population during each iteration.
@@ -75,19 +75,20 @@ The defaults values are as follows:
 | cutoff  | 0.80     |
 | initial_population  | nothing      |
 
-As an example, by running the code below you can see if a circuit can be found, consisting of only resistors and capacitors, that is capable of fitting the example measurement data.
+As an example, by running the code below you can see if a circuit can be found, consisting of only resistors and capacitors, that is capable of fitting the example measurement data. The `data` argument is the filepath of the [example_measurements.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/example_measurements.csv) file.
 
 ```julia
-circuitevolution("example_measurements.csv",terminals="RC")
+circuitevolution(data,terminals="RC")
 ```
 
 Next, the file [Circuitlibrary.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/Circuitlibrary.csv) contains a collection of various circuit topologies. We can allow the algorithm to start from this circuit collection as initial population as follows:
 
 ```julia
-# Load the population from the CSV file, using the loadpopulation function
-circuit_library = loadpopulation(Circuitlibrary.csv);
+# Load the population from the CSV file, using the loadpopulation function.
+# The input of the loadpopulation should be the filepath of Circuitpopulation.csv.
+circuit_library = loadpopulation("Circuitlibrary.csv"); #The input should be the filepath of the Circuitlibrary.csv file.
 
 # Now find a circuit that fits the data, starting from the initial population of circuits
-circuitevolution("example_measurements.csv",initial_population = circuit_library)
+circuitevolution(data,initial_population = circuit_library)
 
 ```
