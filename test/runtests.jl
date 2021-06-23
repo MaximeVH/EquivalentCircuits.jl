@@ -3,9 +3,14 @@ using EquivalentCircuits: subcircuits, flatten, readablecircuit, simplifycircuit
 using EquivalentCircuits: isterminal, isoperation, generatekarva, karva_parameters,karva_to_tree, Circuit
 using EquivalentCircuits: tree_to_function, circuitfunction 
 
-data = readdlm(raw"C:\Users\Dell\Documents\EquivalentCircuits.jl\example_measurements.csv",',')
-measurements = data[:,1] .+ data[:,2]im
-frequencies = data[:,3]
+measurements = [5919.90 - 15.79im, 5919.58 - 32.68im, 5918.18 - 67.58im, 5912.24 - 139.49im,
+ 5887.12 - 285.74im, 5785.04 - 566.88im, 5428.94 - 997.19im, 4640.21 - 1257.83im, 3871.84 - 978.97im,
+  3537.68 - 564.96im, 3442.94 - 315.40im, 3418.14 - 219.69im, 3405.51 - 242.57im, 3373.90 - 396.07im,
+   3249.67 - 742.03im, 2808.42 - 1305.92im, 1779.41 - 1698.97im, 701.96 - 1361.47im, 208.29 - 777.65im, 65.93 - 392.51im]
+
+frequencies = [0.10, 0.21, 0.43, 0.89, 1.83, 3.79, 7.85, 16.24, 33.60, 69.52, 143.84, 297.64, 615.85, 1274.27, 2636.65,
+ 5455.59, 11288.38, 23357.21, 48329.30, 100000.00]
+
 library = loadpopulation("Circuitlibrary.csv");
 library_fit = "R1-[C2,R3-[C4,R5]]"
 
@@ -33,30 +38,30 @@ tree = karva_to_tree(encoding,parameters)
 
 @testset "EquivalentCircuits.jl" begin
     # Check the circuitevolution function.
-    library_fit == circuitevolution("example_measurements.csv",initial_population = library)[1]
+    @test library_fit == circuitevolution(measurements,frequencies,initial_population = library)[1]
     # Evaluate properties of the generated circuit encoding.
-    EquivalentCircuits.isoperation(encoding[1]) == true
+    @test EquivalentCircuits.isoperation(encoding[1]) == true
     # Only terminals in the encoding's tail.
-    all(EquivalentCircuits.isterminal.(collect(encoding[head+1:end]))) == true
+    @test all(EquivalentCircuits.isterminal.(collect(encoding[head+1:end]))) == true
     # conversion of circuit object to user-readable circuit.
-    readablecircuit(example_circuit) == "[C1,P2]-R3-[R4,R5]"
+    @test readablecircuit(example_circuit) == "[C1,P2]-R3-[R4,R5]"
     # Check the output of circuit simulation.
-    example_function(exam_params,100) == 1789.4845259396134 - 10.86703970004648im
+    @test example_function(exam_params,100) == 1789.4845259396134 - 10.86703970004648im
     # Replace redundant CPEs and simplify
     replace_redundant_cpes!(example_circuit_redundant_CPE) # converts the redundant CPE to an equivalent capacitor.
     simplifycircuit!(example_circuit_redundant_CPE) # simplifies all parralelly or serially connected similar components.
     # Circuit simplification should lead to a single resistor element R3.
-    readablecircuit(example_circuit_redundant_CPE) == "C1-R2"
+    @test readablecircuit(example_circuit_redundant_CPE) == "C1-R2"
     # Parameteroptimisation : basic checks of solution lengths and bounds.
     optparams = parameteroptimisation("[C1,P2]-R3",measurements,frequencies)
-    length(optparams) == 3
-    size(optparams[2])[1] == 2
+    @test length(optparams) == 3
+    @test size(optparams[2])[1] == 2
     C1,P2_1,P2_2,R3 = flatten(optparams)
-    0<C1<10
-    0<P2_1<1.0e9
-    0<P2_2<1
-    0<R3<1.0e9
+    @test 0<C1<10
+    @test 0<P2_1<1.0e9
+    @test 0<P2_2<1
+    @test 0<R3<1.0e9
     # Subtrees length checking. There ought to be as many circuits as coding terminal elements.
-    length(subcircuits(example_circuit)) == 3 
+    @test length(subcircuits(example_circuit)) == 5 
 
 end
