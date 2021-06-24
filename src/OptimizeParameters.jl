@@ -24,10 +24,13 @@ function optimizeparameters(objective,initial_parameters,upper)
 end
 
 """
-    parameteroptimisation(circuit,measurements,frequencies)
+    parameteroptimisation(circuit::String,measurements,frequencies) 
 fits the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
+The inputs are a circuit (e.g. "R1-[C2,R3]-P4"), an array of complex-values impedance measurements and their corresponding frequencies.
+The output is an array of parameter values that correspond to the components of the circuit. The number next to the component in the
+circuit corresponds to the index of its parameter in the output.
 """
-function parameteroptimisation(circuit,measurements,frequencies) #add another method where initial parameters are given.
+function parameteroptimisation(circuit::String,measurements,frequencies) 
     #   generate initial parameters.
         elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
         initial_parameters = flatten(karva_parameters(elements))
@@ -43,7 +46,16 @@ function parameteroptimisation(circuit,measurements,frequencies) #add another me
         return deflatten_parameters(results.minimizer,circuit)
 end
 
-function parameteroptimisation(circuit::String,data::String) #add another method where initial parameters are given.
+"""
+    parameteroptimisation(circuit::String,data::String) 
+fits the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
+The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath of a CSV file with three columns: a column with the real part of the
+impedance measurements, a column with the imaginary part of the impedance measurements, and a column with the frequency values associated
+with the measurements. The output is an array of parameter values that correspond to the components of the circuit. The number next to the component in the
+circuit corresponds to the index of its parameter in the output.
+"""
+
+function parameteroptimisation(circuit::String,data::String) 
         meansurement_file = readdlm(data,',')
         # convert the measurement data into usable format.
         reals = meansurement_file[:,1]
