@@ -24,11 +24,27 @@ function optimizeparameters(objective,initial_parameters,upper)
 end
 
 """
-    parameteroptimisation(circuit::String,measurements,frequencies) 
-fits the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
-The inputs are a circuit (e.g. "R1-[C2,R3]-P4"), an array of complex-values impedance measurements and their corresponding frequencies.
-The output is an array of parameter values that correspond to the components of the circuit. The number next to the component in the
-circuit corresponds to the index of its parameter in the output.
+    parameteroptimisation(circuit::String,measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1})
+   
+Fit the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
+
+The inputs are a circuit (e.g. "R1-[C2,R3]-P4"), an array of complex-valued impedance measurements and their corresponding frequencies.
+The output is NamedTuple of the circuit's components with their corresponding parameter values.
+
+# Example
+```julia
+
+julia> using EquivalentCircuits, Random
+
+julia> Random.seed!(25);
+
+julia> measurements = [5919.9 - 15.7, 5918.1 - 67.5im, 5887.1 - 285.7im, 5428.9 - 997.1im, 3871.8 - 978.9im, 
+3442.9 - 315.4im, 3405.5 - 242.5im, 3249.6 - 742.0im, 1779.4 - 1698.9im,  208.2 - 777.6im, 65.9 - 392.5im];
+
+julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 11288.38, 48329.30, 100000.00];
+
+julia> parameteroptimisation("R1-[C2,R3-[C4,R5]]",measurements,frequencies)
+(R1 = 19.953805651358255, C2 = 3.999778355811269e-9, R3 = 3400.0089192843684, C4 = 3.999911415903211e-6, R5 = 2495.2493215522577)
 """
 function parameteroptimisation(circuit::String,measurements,frequencies) 
     #   generate initial parameters.
@@ -43,16 +59,17 @@ function parameteroptimisation(circuit::String,measurements,frequencies)
     #   optimize.
         inner_optimizer = NelderMead()
         results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 20.0))
-        return deflatten_parameters(results.minimizer,circuit)
+        return parametertuple(circuit,results.minimizer)
 end
 
 """
-    parameteroptimisation(circuit::String,data::String) 
-fits the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
-The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath of a CSV file with three columns: a column with the real part of the
-impedance measurements, a column with the imaginary part of the impedance measurements, and a column with the frequency values associated
-with the measurements. The output is an array of parameter values that correspond to the components of the circuit. The number next to the component in the
-circuit corresponds to the index of its parameter in the output.
+    parameteroptimisation(circuit::String,filepath::String)
+
+Fit the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
+
+The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath to a CSV file containing the three following columns: 
+the real part of the impedance, the imaginary part of the impedance, and the frequencies corresponding to the measurements.
+The output is NamedTuple of the circuit's components with their corresponding parameter values.
 """
 
 function parameteroptimisation(circuit::String,data::String) 
@@ -74,7 +91,7 @@ function parameteroptimisation(circuit::String,data::String)
     #   optimize.
         inner_optimizer = NelderMead()
         results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 20.0))
-        return deflatten_parameters(results.minimizer,circuit)
+        return parametertuple(circuit,results.minimizer)
 end
 
 function deflatten_parameters(parameters,tree,param_inds)
