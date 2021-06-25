@@ -30,22 +30,22 @@ exam_params_redundant_CPE = [0.0, 0.0, 0.0, 1543.907617339479, 770.7386241387493
   [618.972522236354, 0.1547431305590885], [764.360425865072, 0.191090106466268], [3817.8583766637335, 0.9544645941659333]];
 example_tree = karva_to_tree(example_encoding,example_parameters);
 example_circuit = Circuit(example_encoding,example_parameters,nothing);
-example_circuit_redundant_CPE = EquivalentCircuits.Circuit(example_encoding,exam_params_redundant_CPE,nothing);
+example_circuit_redundant_CPE = Circuit(example_encoding,exam_params_redundant_CPE,nothing);
 example_function = tree_to_function(example_tree);
 Readable_example_circuit = readablecircuit(example_circuit);
 example_function2 = circuitfunction(Readable_example_circuit);
-circuit = EquivalentCircuits.Circuit(encoding,parameters,nothing);
+circuit = Circuit(encoding,parameters,nothing);
 readable_circuit = readablecircuit(circuit);
 tree = karva_to_tree(encoding,parameters);
 
 
 @testset "EquivalentCircuits.jl" begin
     # Check the circuitevolution function.
-    @test library_fit == circuitevolution(measurements,frequencies,initial_population = library)[1]
+    @test library_fit == circuitevolution(measurements,frequencies,initial_population = library).Circuit
     # Evaluate properties of the generated circuit encoding.
-    @test EquivalentCircuits.isoperation(encoding[1]) == true
+    @test isoperation(encoding[1]) == true
     # Only terminals in the encoding's tail.
-    @test all(EquivalentCircuits.isterminal.(collect(encoding[head+1:end]))) == true
+    @test all(isterminal.(collect(encoding[head+1:end]))) == true
     # conversion of circuit object to user-readable circuit.
     @test readablecircuit(example_circuit) == "[C1,P2]-R3-[R4,R5]"
     # Check the output of circuit simulation.
@@ -57,9 +57,8 @@ tree = karva_to_tree(encoding,parameters);
     @test readablecircuit(example_circuit_redundant_CPE) == "C1-R2"
     # Parameteroptimisation : basic checks of solution lengths and bounds.
     optparams = parameteroptimisation("[C1,P2]-R3",measurements,frequencies)
-    @test length(optparams) == 3
-    @test size(optparams[2])[1] == 2
-    C1,P2_1,P2_2,R3 = flatten(optparams)
+    @test length(optparams) == 4
+    C1,P2_1,P2_2,R3 = optparams
     @test 0<C1<10
     @test 0<P2_1<1.0e9
     @test 0<P2_2<1
