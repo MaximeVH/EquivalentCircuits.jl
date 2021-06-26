@@ -7,6 +7,14 @@ function savepopulation(fname,population)
         writedlm(fname,array,';')
 end
 
+"""
+    loadpopulation(filepath::String)
+
+Load a library of equivalent electrical circuits, to be provided as initial population for the circuitevolution function.
+
+
+"""
+
 function loadpopulation(filepath)
     population_array = readdlm(filepath,';')
     population_size = size(population_array,1)

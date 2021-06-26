@@ -1,7 +1,7 @@
 name = "EquivalentCircuits"
 uuid = "da5bd070-f609-4e16-a30d-de86b3faa756"
 authors = ["Maxime Van Haeverbeke"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
