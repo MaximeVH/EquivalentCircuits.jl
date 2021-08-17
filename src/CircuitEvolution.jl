@@ -132,7 +132,7 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
         population = initial_population
     end
     # Theoretical simplification of the initial population.
-        simplifypopulation!(population) 
+        simplifypopulation!(population,terminals) 
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
         generation = 0
@@ -142,7 +142,7 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
         min_fitness = elite.fitness
         while (min_fitness > convergence_threshold) && (generation<=generations)
             population = generate_offspring(population,terminals)
-            simplifypopulation!(population)
+            simplifypopulation!(population,terminals)
             evaluate_fitness!(population,measurements,frequencies)
             sort!(population)
             elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
@@ -159,11 +159,11 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
     # adjust top_n so that it can't be larger than the number of converged circuits.
     # top_n = min(top_n,length(population))
-    best_circuit = readablecircuit(population[1])
     # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
     if length(population) == 0
         println("Algorithm did not converge")
     else
+        best_circuit = readablecircuit(population[1])
         return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n]) 
     end
 end

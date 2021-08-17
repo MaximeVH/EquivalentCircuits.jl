@@ -23,8 +23,11 @@ function subtrees(tree)
 end
 
 function redundacy_testing(circuit,measurements,frequencies,terminals = "RCLP",cutoffratio = 0.80)
+    if count(isoperation,circuit.karva[1:3]) < 2
+        return circuit
+    end
     subcircs = subcircuits(circuit,terminals)
-    evaluate_fitness!(subcircs,measurements,frequencies) #customiszable version required in experiments.
+    evaluate_fitness!(subcircs,measurements,frequencies)
     candidate = minimum(subcircs)
     fitnessratio = circuit.fitness/candidate.fitness
     if fitnessratio >= cutoffratio
