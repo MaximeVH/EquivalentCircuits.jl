@@ -1,5 +1,5 @@
-function get_removal_parameters(tree) #in order not to miss hierarchically higher series operations: first do an upward search of the tree going up parents with a while loop as long as only serial operators (so no parallel operator) are encountered.
-    components_to_remove_params = [] #consider an additional sorting by parent (necesssary?).
+function get_removal_parameters(tree) 
+    components_to_remove_params = []
     parallel_detection = false
     components = listcomponents(tree)
     if length(tree) == 3
@@ -88,10 +88,10 @@ function replace_redundant_cpes!(circuit::Circuit)
     cpe_positions = findall(x->x=='P',circuit.karva)
     mutable_karva = split(circuit.karva,"")
     for position in cpe_positions
-        if circuit.parameters[position][2] > 0.99 && (1/(circuit.parameters[position][1]) < 10) #threshold to be adjusted. Capacitor replacement. Second condition avoids 
+        if circuit.parameters[position][2] > 0.99 && (1/(circuit.parameters[position][1]) < 10) 
             mutable_karva[position] = "C"
             circuit.parameters[position] = 1/(circuit.parameters[position][1])
-        elseif circuit.parameters[position][2] < 0.01 #threshold to be adjusted. Resistor replacement.
+        elseif circuit.parameters[position][2] < 0.01 
             mutable_karva[position] = "R"
             circuit.parameters[position] = circuit.parameters[position][1]
         end
@@ -130,7 +130,7 @@ function CPE_replacements(circuit::Circuit)
         return circuit
     end
     replacement_tree = ""
-    replacement_circuits = []#Array{Circuit}(undef,2*length(CPE_nodes))
+    replacement_circuits = []
     for new_type in ['R','C']
         for CPE_node in CPE_nodes
         replacement_tree = Terminalnode_replacement(tree, CPE_node, new_type)
