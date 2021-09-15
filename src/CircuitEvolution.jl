@@ -157,8 +157,6 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
         end
         # extract the converged circuits.
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
-    # adjust top_n so that it can't be larger than the number of converged circuits.
-    # top_n = min(top_n,length(population))
     # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
     if length(population) == 0
         println("Algorithm did not converge")
@@ -233,8 +231,6 @@ function circuitevolution(filepath::String;generations::Real=10,population_size=
     end
     # extract the converged circuits.
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
-    # adjust top_n so that it can't be larger than the number of converged circuits.
-    # top_n = min(top_n,length(population))
     best_circuit = readablecircuit(population[1])
     # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
     if length(population) == 0

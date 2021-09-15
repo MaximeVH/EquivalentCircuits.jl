@@ -464,35 +464,3 @@ function tree_to_circuit_with_inds(tree)
     end
 return  number_circuit(essential_info[1][2]),  essential_info[1][4] , essential_info[1][3]
 end
-
-# function nyquist(circuit::Circuit,n_measurements = 50)
-#     tree = get_circuit_tree(circuit)
-#     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
-#     frequencies = [10.0^i for i in LinRange(-1, 5, n_measurements)];
-#     impedances = simulateimpedance_noiseless(circfunc,params,frequencies)
-#     scatter(real(impedances),-imag(impedances),title = tree_to_circuit(tree)[1])
-# end
-
-# function nyquist(circuit::Circuit, frequencies::AbstractArray{Float64,1})
-#     tree = get_circuit_tree(circuit)
-#     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
-#     # frequencies = [10.0^i for i in LinRange(-1, 5, n_measurements)];
-#     impedances = simulateimpedance_noiseless(circfunc,params,frequencies)
-#     scatter(real(impedances),-imag(impedances),title = tree_to_circuit(tree)[1])
-# end
-
-# function nyquist!(circuit::Circuit,n_measurements = 50)
-#     tree = get_circuit_tree(circuit)
-#     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
-#     frequencies = frequencies = [10.0^i for i in LinRange(-1, 5, n_measurements)];
-#     impedances = simulateimpedance_noiseless(circfunc,params,frequencies)
-#     scatter!(real(impedances),-imag(impedances))
-# end
-
-# function nyquist!(circuit::Circuit,frequencies::AbstractArray{Float64,1})
-#     tree = get_circuit_tree(circuit)
-#     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
-#     # frequencies = frequencies = [10.0^i for i in LinRange(-1, 5, n_measurements)];
-#     impedances = simulateimpedance_noiseless(circfunc,params,frequencies)
-#     scatter!(real(impedances),-imag(impedances))
-# end

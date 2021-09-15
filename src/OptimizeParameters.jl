@@ -1,11 +1,11 @@
 function get_parameter_upper_bound(tree)
-    ranges = Dict('R'=>1.0e9,'C'=>10,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) #Dict('R'=>5000,'C'=>0.001,0.01'L'=>1,'P'=>[100,1],'+'=>0,'-'=>0) , Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0)
+    ranges = Dict('R'=>1.0e9,'C'=>10,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) 
     return [ranges[node.Type] for node in tree]
 end
 
 function get_parameter_upper_bound(readablecircuit::String)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(readablecircuit))
-    ranges = Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) #Dict('R'=>5000,'C'=>0.001,'L'=>1,'P'=>[100,1],'+'=>0,'-'=>0) 
+    ranges = Dict('R'=>1.0e9,'C'=>0.01,'L'=>5,'P'=>[1.0e9,1],'+'=>0,'-'=>0) 
     return flatten([ranges[e] for e in elements])
 end
 

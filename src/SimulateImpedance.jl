@@ -9,19 +9,17 @@ end
 
 function simulateimpedance(circuitfunc,parameters,frequencies,noise_ratio=0.01)
     impedances = [circuitfunc(parameters,fr) for fr in frequencies] 
-    reals = real(impedances)
-    imags = imag(impedances)
-    return [R+rand(Normal(0,abs(R*noise_ratio)))+I*im + rand(Normal(0,abs(-I*noise_ratio)))im for (R,I) in zip(reals,imags)]
+    R = real(impedances)
+    I = imag(impedances)
+    Z = abs.(impedances)
+    return [R[i]+rand(Normal(0,Z[i]*noise_ratio))+I[i]*im+rand(Normal(0,Z[i]*noise_ratio))im for i in 1:length(impedances)]
 end
 
 function simulateimpedance(circuit::Circuit,frequencies,noise_ratio=0.01)
     circuitfunc = tree_to_function(get_circuit_tree(circuit))
     impedances = [circuitfunc(circuit.parameters,fr) for fr in frequencies] 
-    reals = real(impedances)
-    imags = imag(impedances)
-    return [R+rand(Normal(0,abs(R*noise_ratio)))+I*im + rand(Normal(0,abs(-I*noise_ratio)))im for (R,I) in zip(reals,imags)]
+    R = real(impedances)
+    I = imag(impedances)
+    Z = abs.(impedances)
+    return [R[i]+rand(Normal(0,Z[i]*noise_ratio))+I[i]*im+rand(Normal(0,Z[i]*noise_ratio))im for i in 1:length(impedances)]
 end
-
-# function nyquist(measurements)
-#     scatter(real(measurements),-imag(measurements))
-# end

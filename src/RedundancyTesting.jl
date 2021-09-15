@@ -1,4 +1,4 @@
-function subcircuits(circuit,terminals = "RCLP") #externally avoid 2-component circuits to be input.
+function subcircuits(circuit,terminals = "RCLP")
     subcircs = Circuit[]; karva = ""; parameters = []; 
     sublength = 0
     coding_length = length(circuit.karva)
@@ -39,7 +39,7 @@ end
 
 function get_subcircuits(circuit,measurements,frequencies,terminals = "RCLP")
     subcircs = subcircuits(circuit,terminals)
-    evaluate_fitness!(subcircs,measurements,frequencies) #customiszable version required in experiments.
+    evaluate_fitness!(subcircs,measurements,frequencies) 
     return subcircs
 end
 
