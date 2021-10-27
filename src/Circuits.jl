@@ -39,7 +39,7 @@ end
 
 function karva_parameters(karva) 
     parameters = Array{Any}(undef, length(karva))
-    ranges = Dict('R'=>4000,'C'=> 0.0001,'L'=> 1,'+'=> 0,'-'=> 0,'P'=>[4000,1])
+    ranges = Dict('R'=>4000,'C'=> 0.0001,'L'=> 1,'+'=> 0,'-'=> 0,'P'=>[4000,1], 'W'=>4000)
     for (e,i) in enumerate(karva)
             if e == 'P'
                 Element_values[n] = [ranges[e][1]*rand(),ranges[e][2]*rand()]

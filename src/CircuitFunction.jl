@@ -3,7 +3,7 @@ function circuitfunction(Circuit)
         Circuit=replace(Circuit,f=>t)
     end
     for I in 2:-1:1
-        Es = eachmatch(Regex("([CLRP])([0-9]){$(I)}"),Circuit)
+        Es = eachmatch(Regex("([CLRPW])([0-9]){$(I)}"),Circuit)
             for e in Es
                 match = e.match
                 if match[1] == 'C'
@@ -14,6 +14,8 @@ function circuitfunction(Circuit)
                  Circuit = replace(Circuit,match=>"(2im*π*f*"*"T"*")")
              elseif match[1] == 'P'
                  Circuit = replace(Circuit,match=>"T*(2*π*f)^(-N)"*"*(cos((π*N)*0.5)-sin((π*T)*0.5)im)")
+             elseif match[1] == 'W'
+                 Circuit = replace(Circuit,match=>"T*(2*π*f)^(-0.5)"*"*(cos((π*0.5)*0.5)-sin((π*0.5)*0.5)im)")
             end
         end
 end
