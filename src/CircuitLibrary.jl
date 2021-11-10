@@ -12,9 +12,7 @@ end
 
 Load a library of equivalent electrical circuits, to be provided as initial population for the circuitevolution function.
 
-
 """
-
 function loadpopulation(filepath)
     population_array = readdlm(filepath,';')
     population_size = size(population_array,1)
@@ -185,4 +183,65 @@ function karva_parameters3(karva,limited_params)
         end
     end
     return parameters
+end
+
+function nyquist_parameter_optimisation(circuit,measurements,frequencies,first_method=:de_rand_1_bin)
+    elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
+    initial_parameters = flatten(karva_parameters(elements));
+    circfunc = circuitfunction(circuit)
+    objective = objectivefunction(circfunc,measurements,frequencies)
+    lower = zeros(length(initial_parameters))
+    upper = get_parameter_upper_bound(circuit)
+
+    ### First step ###
+    SR = Array{Tuple{Float64,Float64},1}(undef,length(initial_parameters))
+    for (e,(l,u)) in enumerate(zip(lower,upper))
+        SR[e] = (l,u)
+    end
+    res = bboptimize(objective; SearchRange = SR, Method = first_method,MaxSteps=170000,TraceMode = :silent);
+    initial_parameters = best_candidate(res)
+    fitness_1 = best_fitness(res)
+    ### Second step ###
+    inner_optimizer = NelderMead()
+    results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 50.0)); #20.0
+    fitness_2 = results.minimum
+    best = results.minimizer
+
+    parameters = fitness_2 < fitness_1 ? best : initial_parameters
+    fitness = max(fitness_2,fitness_1)  
+    return parameters,fitness
+end
+
+function element_count(circuit)
+    return sum([occursin(t,"RCLPW") for t in circuit])
+end
+
+function circuit_literaturesearch(measurements,frequencies,terminals,domain,fitness_threshold,max_complexity) #both the circuitlibrary and corresponding metadata are required here.
+    #Filtering of the circuit library, using the input terminal and domain info.
+    circuit = ["P1-R2-[C3,R4]","R1-[C2,R3]","P1-[R2,C3]-P4","R1-[C2,R3]-R4-P5","[R1,C2-R3-[C4,R5]]","[R1,[C2,R3]-R4]","[R1,C2-[R3,C4-R5]]","R1-[P2,R3]",          "[R1-C2,R3]",        "W1-[R2,C3]-R4",       "R1-[P2,R3]-[P4,R5]",  "[R1,[R2,R3-C4]]",  "[R1,C2]",           "[R1,C2-[R3-C4,R5]]","[R1-[P2,R3],C4]","[C1-R2-C3,C4]","R1-[P2,R3]","R1-[R2,C3]","R1-[R3-W4,C2]","C1-R2-C3","R1-[C2,[P3,R4]-R5]","R1-[R2-W3,C4]","R1-[W2-P3,R4]","R1-[W2-R3,P4]","R1-[P2,R3-W4]","R1-[C2-C3-C4,R5-W6]","R1-P2-[R3,C4]","R1-[P2,R3-P4]","R1-[P2,R3-W4]-[P5,R6]","R1-[C2,R3-W4]-[C5,R6]","R1-[C2,R3]-P4","R1-C2-[R3,P4]","R1-[R2,C3]-[R4,C5]-W6","[C1-R2,[C3-R4,R5]-[C6-R7,R8]]-R9-L10","[R1-[R2,C3],C4]","R1-[[R2,C3],L4,R5]","R1-[C2,R3]-[C4,W5]","R1-[R2-P3,P4]","R1-[W2,[R3,C4-W5]]","R1-[[C2,R3],R4-L5]","P1-R2-L3-[R4,P5]-[R6,P7]","[C1,R2-C3]","R1-[P2,R3-[P4,R5]]","R1-[C2,R3]-[C4,R5]","R1-[P2,R3]-[L4,R5]-P6", "[C1,[W2,R3]-W4]","R1-[C2,R3-W4]"]
+    domains = ["Animals","Animals","Animals","Animals","Animals","Plants","Plants","Plants","Plants","Plants","Plants","Plants","Plants","Plants","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Biosensors","Batteries","Batteries","Batteries","Batteries","Batteries","Batteries","Batteries","Batteries","Batteries","Materials","Materials","Materials","Materials","Materials","Materials"]
+    @assert domain ∈ unique(domains) "Invalid domain provided."
+    domain_inds = findall(x-> x == domain,domains)
+    circuit = circuit[domain_inds]
+    complexity_inds = findall(x-> x <= max_complexity,element_count.(circuit))
+    circuit = circuit[complexity_inds]
+    terminal_complement = join(["R","W","P","L","C"][[!occursin(x,terminals) for x in ["R","W","P","L","C"]]])
+    terminal_inds = findall(x->!occursin(terminal_complement,x),circuit)
+    circuit = circuit[terminal_inds]
+    parameters = []
+    fitnesses = []
+    for c in circuit
+        params,fitness =  nyquist_parameter_optimisation(c,measurements,frequencies)
+        push!(parameters,params)
+        push!(fitnesses,fitness)
+    end
+    fitness_inds = findall(x -> x <= fitness_threshold, fitnesses)
+    fitnesses = fitnesses[fitness_inds]
+    circuit = circuit[fitness_inds]
+    if isempty(circuit)
+        println("No available circuits adequately fit the given measurement data.")
+    else
+        sp = sortperm(fitnesses)
+        return circuit[sp]
+    end
 end
