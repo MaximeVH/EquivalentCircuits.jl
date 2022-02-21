@@ -1,6 +1,7 @@
+
 # EquivalentCircuits.jl
 
-This Julia module allows users to analyse their **electrochemical impedance spectroscopy** data using **equivalent electrical circuits**. EquivalentCircuits.jl can be used to either fit the parameters of a given equivalent electrical circuit , or to get recommendations for an appropriate equivalent electrical circuit configuration. The latter is based on a [gene expression programming](https://en.wikipedia.org/wiki/Gene_expression_programming) approach.
+This Julia module allows users to analyse their **electrochemical impedance spectroscopy** (EIS) data using **equivalent electrical circuits**. EquivalentCircuits.jl can be used to either fit the parameters of a given equivalent electrical circuit , or to get recommendations for an appropriate equivalent electrical circuit configuration. The latter is done by conducting an automatic literature search, where the compatibility of impedance measurements with a variety of equivalent circuits from the EIS literature is evaluated. Alternatively, a [gene expression programming](https://en.wikipedia.org/wiki/Gene_expression_programming)-based approach can be used to algorithmically search for compatible circuits.
 
 ## Installation
 The package can be installed using the package manager.
@@ -32,17 +33,17 @@ Lets first take a look at what the çontents of the [example_measurements.csv](h
 ```julia
 using CSV, DataFrames
 
-#Load the measurement data.
+#Load the measurement data.
 
-data = "example_measurements.csv"; #This should be the filepath of the example_measurements.csv file.
+data = "example_measurements.csv"; #This should be the filepath of the example_measurements.csv file.
 
-df = CSV.read("example_measurements.csv",DataFrame,header = false);
+df = CSV.read("example_measurements.csv",DataFrame,header = false);
 
-#Rename the columns for illustration purposes.
+#Rename the columns for illustration purposes.
 
-rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies");
+rename_dict = Dict("Column1"=>"Reals","Column2"=>"Imags","Column3"=>"Frequencies");
 
-rename!(df, rename_dict);
+rename!(df, rename_dict);
 
 println(df)
 
@@ -61,9 +62,16 @@ frequencies = [0.10, 0.21, 0.43, 0.89, 1.83, 3.79, 7.85, 16.24, 33.60, 69.52, 14
 
 circuitparams = parameteroptimisation(circuit,measurements,frequencies)
 ```
+### Circuit literature search
+The compatibility of a given set of impedance measurements with circuits from similar applications is evaluated with the `circuit_literaturesearch(data,domain;kwargs)` function.  Users can finetune the search by restricting the complexity and element composition of the returned circuits. The function returns the compatible circuits along with their Digital Object Identifier (DOI) so that users can examine the circuits' other uses to further evaluate its suitability. An overview of the function's inputs is provided below:
+
+- `data` : A CSV filepath to the measurements with their frequency information.
+- `domain` : The application. The supported applications are:  "Animals",  "Plants",  "Biosensors" , "Batteries", "Fuel_cells" , "Supercapacitors",  and  "Materials".
+- `terminals`  : (optional) the circuit components that are to be included in the circuit identification.
+- `max_complexity`  : a hyperparameter than controls the maximum considered complexity of the circuits.
 
 ### Circuit fitting
-When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be obtained using the `circuitevolution(data;kwargs)` function. The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
+When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be also be obtained using the `circuitevolution(data;kwargs)` function. The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
 
 - `generations` : the maximum number of algorithm iterations.
 - `population_size` : the number of individuals in the population during each iteration.
