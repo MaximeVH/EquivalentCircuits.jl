@@ -244,7 +244,7 @@ function get_literature_info()
 end
 
 """
-circuit_literaturesearch(measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1},domain::String; <keyword arguments>)
+circuit_search(measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1},domain::String; <keyword arguments>)
 
 Evaluates the compatibility of a given set of measurement data with circuits from the literature, for a specific application domain.
 
@@ -257,7 +257,7 @@ of the accompanying literature.
 - `max_complexity::Integer=20`: a hyperparameter than controls the maximum considered complexity of the circuits.
 - `fitness_threshold::10e-5`: The objective function threshold under which a circuit is considered to fit the measurements.
 """
-function circuit_literaturesearch(measurements,frequencies,domain;terminals="RCLPW",fitness_threshold=10e-5,max_complexity=20)
+function circuit_search(measurements,frequencies,domain;terminals="RCLPW",fitness_threshold=10e-5,max_complexity=20)
     circuit,domains,dois = get_literature_info()
     @assert domain ∈ unique(domains) "Invalid domain provided."
     domain_inds = findall(x-> x == domain,domains)

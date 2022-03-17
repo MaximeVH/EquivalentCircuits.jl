@@ -91,7 +91,7 @@ function evaluate_fitness!(population,measurements,frequencies)
 end
 
 """
-circuitevolution(measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1}; <keyword arguments>)
+circuit_evolution(measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1}; <keyword arguments>)
 
 Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements. 
 
@@ -120,11 +120,11 @@ julia> measurements = [5919.9 - 15.7, 5918.1 - 67.5im, 5887.1 - 285.7im, 5428.9 
 
 julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 11288.38, 48329.30, 100000.00];
 
-julia> circuitevolution(measurements, frequencies , generations= 15, terminals = "RC")
+julia> circuit_evolution(measurements, frequencies , generations= 15, terminals = "RC")
 [R1,C2]-[C3,R4]-R5
 ```
 """
-function circuitevolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing)
+function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing)
     # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
@@ -167,7 +167,7 @@ function circuitevolution(measurements,frequencies;generations::Real=10,populati
 end
 
 """
-    circuitevolution(filepath::String; <keyword arguments>)
+    circuit_evolution(filepath::String; <keyword arguments>)
 
  Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements. 
 
@@ -187,7 +187,7 @@ end
 
 """
 
-function circuitevolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing)
+function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing)
     # Read the measurement file.
     meansurement_file = readdlm(filepath,',')
     # convert the measurement data into usable format.
