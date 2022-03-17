@@ -63,7 +63,7 @@ frequencies = [0.10, 0.21, 0.43, 0.89, 1.83, 3.79, 7.85, 16.24, 33.60, 69.52, 14
 circuitparams = parameteroptimisation(circuit,measurements,frequencies)
 ```
 ### Circuit literature search
-The compatibility of a given set of impedance measurements with circuits from similar applications is evaluated with the `circuit_literaturesearch(data,domain;kwargs)` function.  Users can finetune the search by restricting the complexity and element composition of the returned circuits. The function returns the compatible circuits along with their Digital Object Identifier (DOI) so that users can examine the circuits' other uses to further evaluate its suitability. An overview of the function's inputs is provided below:
+The compatibility of a given set of impedance measurements with circuits from similar applications is evaluated with the `circuit_search(data,domain;kwargs)` function.  Users can finetune the search by restricting the complexity and element composition of the returned circuits. The function returns the compatible circuits along with their Digital Object Identifier (DOI) so that users can examine the circuits' other uses to further evaluate its suitability. An overview of the function's inputs is provided below:
 
 - `data` : A CSV filepath to the measurements with their frequency information.
 - `domain` : The application. The supported applications are:  "Animals",  "Plants",  "Biosensors" , "Batteries", "Fuel_cells" , "Supercapacitors",  and  "Materials".
@@ -71,7 +71,7 @@ The compatibility of a given set of impedance measurements with circuits from si
 - `max_complexity`  : a hyperparameter than controls the maximum considered complexity of the circuits.
 
 ### Circuit fitting
-When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be also be obtained using the `circuitevolution(data;kwargs)` function. The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
+When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be also be obtained using the `circuit_evolution(data;kwargs)` function. The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
 
 - `generations` : the maximum number of algorithm iterations.
 - `population_size` : the number of individuals in the population during each iteration.
@@ -95,12 +95,12 @@ The defaults values are as follows:
 As an example, by running the code below you can see if a circuit can be found, consisting of only resistors and capacitors, that is capable of fitting the example measurement data. The `data` argument is the filepath of the [example_measurements.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/example_measurements.csv) file.
 
 ```julia
-circuitevolution(data,terminals="RC")
+circuit_evolution(data,terminals="RC")
 ```
 Alternatively, this function can also accept the measurements and frequencies as vectors, rather than a CSV file:
 
 ```julia
-circuitevolution(measurements,frequencies,terminals="RC")
+circuit_evolution(measurements,frequencies,terminals="RC")
 ```
 
 Next, the file [Circuitlibrary.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/Circuitlibrary.csv) contains a collection of various circuit topologies. We can allow the algorithm to start from this circuit collection as initial population as follows:
@@ -111,6 +111,6 @@ Next, the file [Circuitlibrary.csv](https://github.com/MaximeVH/EquivalentCircui
 circuit_library = loadpopulation("Circuitlibrary.csv"); #The input should be the filepath of the Circuitlibrary.csv file.
 
 # Now find a circuit that fits the data, starting from the initial population of circuits
-circuitevolution(data,initial_population = circuit_library)
+circuit_evolution(data,initial_population = circuit_library)
 
 ```
