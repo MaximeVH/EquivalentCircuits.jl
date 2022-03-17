@@ -1,9 +1,9 @@
 module EquivalentCircuits
 
-    export circuitevolution
+    export circuit_evolution
     export parameteroptimisation
     export loadpopulation
-    export circuit_literaturesearch
+    export circuit_search
     export Circuit, EquivalentCircuit
     using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim
     using BlackBoxOptim
