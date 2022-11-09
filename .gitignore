@@ -3,3 +3,5 @@ circuitlibrary/circuitmetadata.csv
 experiments/
 test.jl
 examples/circuitlib.jl
+.vscode/settings.json
+.gitignore
