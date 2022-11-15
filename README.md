@@ -95,12 +95,12 @@ The defaults values are as follows:
 As an example, by running the code below you can see if a circuit can be found, consisting of only resistors and capacitors, that is capable of fitting the example measurement data. The `data` argument is the filepath of the [example_measurements.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/example_measurements.csv) file.
 
 ```julia
-circuit_evolution(data,terminals="RC")
+circuitevolution(data,terminals="RC")
 ```
 Alternatively, this function can also accept the measurements and frequencies as vectors, rather than a CSV file:
 
 ```julia
-circuit_evolution(measurements,frequencies,terminals="RC")
+circuitevolution(measurements,frequencies,terminals="RC")
 ```
 
 Next, the file [Circuitlibrary.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/Circuitlibrary.csv) contains a collection of various circuit topologies. We can allow the algorithm to start from this circuit collection as initial population as follows:
@@ -111,6 +111,6 @@ Next, the file [Circuitlibrary.csv](https://github.com/MaximeVH/EquivalentCircui
 circuit_library = loadpopulation("Circuitlibrary.csv"); #The input should be the filepath of the Circuitlibrary.csv file.
 
 # Now find a circuit that fits the data, starting from the initial population of circuits
-circuit_evolution(data,initial_population = circuit_library)
+circuitevolution(data,initial_population = circuit_library)
 
 ```
