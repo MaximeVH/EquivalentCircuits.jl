@@ -57,7 +57,7 @@ end
 function tree_to_function(tree_array)
     b_new = true
     dictionary_of_calculations_orig = Dict('R'=>"T",'C'=>"(1/(2im*π*f*"*"T"*"))",'L'=>"(2im*π*f*"*"T"*")",'P'=>"T[1]*(2*π*f)^(-T[2])"*"*(cos((π*T[2])*0.5)-sin((π*T[2])*0.5)im)") 
-    dictionary_of_calculations_new = Dict('R'=>"T",'C'=>"(1/(2im*π*f*"*"T"*"))",'L'=>"(2im*π*f*"*"T"*")",'P'=>"(1/(T[1]*(2im*π*f)^(T[2])))"*"*(cos((π*T[2])*0.5)-sin((π*T[2])*0.5)im)") 
+    dictionary_of_calculations_new = Dict('R'=>"T",'C'=>"(1/(2im*π*f*"*"T"*"))",'L'=>"(2im*π*f*"*"T"*")",'P'=>"(1/(T[1]*(2im*π*f)^T[2]))") 
 
     if b_new
         dictionary_of_calculations = dictionary_of_calculations_new
