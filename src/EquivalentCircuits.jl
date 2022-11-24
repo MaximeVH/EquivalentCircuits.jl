@@ -2,6 +2,7 @@ module EquivalentCircuits
 
     export circuit_evolution
     export parameteroptimisation
+    export circuitfunction
     export loadpopulation
     export circuit_search
     export Circuit, EquivalentCircuit
