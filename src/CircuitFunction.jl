@@ -1,6 +1,6 @@
 function circuitfunction(Circuit)
     b_new = true
-    b_debug = true
+    b_debug = false
     if b_debug println("Circuit, in: ", Circuit) end
     for (f, t) in zip(["-", "[",  ",",      "]"],
                       ["+", "((", ")^-1+(", ")^-1)^-1"])
