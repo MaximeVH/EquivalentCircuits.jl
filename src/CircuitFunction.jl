@@ -1,7 +1,6 @@
 function circuitfunction(Circuit)
     b_new = true
     b_debug = true
-    Circuit_in = Circuit
     if b_debug println("Circuit, in: ", Circuit) end
     for (f, t) in zip(["-", "[",  ",",      "]"],
                       ["+", "((", ")^-1+(", ")^-1)^-1"])
@@ -25,7 +24,7 @@ function circuitfunction(Circuit)
                     Circuit_P_orig = replace(Circuit,match=>"T*(2*π*f)^(-N)"*"*(cos((π*N)*0.5)-sin((π*T)*0.5)im)")
                     if b_new
                         Circuit = Circuit_P_new
-                        if b_debug println("new: circuit ") end
+                        if b_debug println("new:  circuit") end
                     else
                     # original:
                         Circuit = Circuit_P_orig
