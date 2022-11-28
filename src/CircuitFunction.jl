@@ -1,6 +1,7 @@
 function circuitfunction(Circuit)
     b_new = true
-    b_debug = false
+    b_debug = true
+    Circuit_in = Circuit
     if b_debug println("Circuit, in: ", Circuit) end
     for (f, t) in zip(["-", "[",  ",",      "]"],
                       ["+", "((", ")^-1+(", ")^-1)^-1"])
@@ -37,6 +38,8 @@ function circuitfunction(Circuit)
             end
         end
     end
+    if b_debug println("circuit, final: \n", Circuit, "\n") end
+    # ---
     new_circuit = ""
     counter = 1
     for i in Circuit
@@ -45,12 +48,14 @@ function circuitfunction(Circuit)
             counter += 1
         elseif i == 'N'
             new_circuit = new_circuit*"T["*string(counter)*"]"
+            counter += 1
         else
             new_circuit = new_circuit*i
         end
     end
-
+    if b_debug println("new_circuit: ", new_circuit) end
     Circuit_expression = Meta.parse(new_circuit)
+    if b_debug println("Circuit_expression: ", Circuit_expression) end
     return mk_function([:T,:f],[], Circuit_expression)
 end
 
