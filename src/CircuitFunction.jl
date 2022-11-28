@@ -8,32 +8,31 @@ function circuitfunction(Circuit)
             for e in Es
                 match = e.match
                 if match[1] == 'C'
-                 Circuit = replace(Circuit,match=>"(1/(2im*π*f*"*"T"*"))")
+                    Circuit = replace(Circuit,match=>"(1/(2im*π*f*"*"T"*"))")
                 elseif match[1] == 'R'
-                 Circuit = replace(Circuit,match=>"T")
+                    Circuit = replace(Circuit,match=>"T")
                 elseif match[1] == 'L'
-                 Circuit = replace(Circuit,match=>"(2im*π*f*"*"T"*")")
-             elseif match[1] == 'P'
-                 Circuit = replace(Circuit, match => "(1/("*"T"*"*(2im*π*f)^"*"N"*"))") # compatible to package "impedance.py"
-             elseif match[1] == 'W'
-                 Circuit = replace(Circuit,match=>"T*(2*π*f)^(-0.5)"*"*(cos((π*0.5)*0.5)-sin((π*0.5)*0.5)im)")
+                    Circuit = replace(Circuit,match=>"(2im*π*f*"*"T"*")")
+                elseif match[1] == 'P'
+                    Circuit = replace(Circuit, match => "(1/("*"T"*"*(2im*π*f)^"*"N"*"))") # compatible to package "impedance.py"
+                elseif match[1] == 'W'
+                    Circuit = replace(Circuit,match=>"T*(2*π*f)^(-0.5)"*"*(cos((π*0.5)*0.5)-sin((π*0.5)*0.5)im)")
             end
         end
-end
-new_circuit = ""
-counter = 1
-for i in Circuit
-    if i == 'T'
-        new_circuit = new_circuit*"T["*string(counter)*"]"
-        counter += 1
-    elseif i == 'N'
-        new_circuit = new_circuit*"T["*string(counter)*"]"
-        counter += 1
-    else
-        new_circuit = new_circuit*i
     end
-end
-
+    new_circuit = ""
+    counter = 1
+    for i in Circuit
+        if i == 'T'
+            new_circuit = new_circuit*"T["*string(counter)*"]"
+            counter += 1
+        elseif i == 'N'
+            new_circuit = new_circuit*"T["*string(counter)*"]"
+            counter += 1
+        else
+            new_circuit = new_circuit*i
+        end
+    end
     Circuit_expression = Meta.parse(new_circuit)
     return mk_function([:T,:f],[],Circuit_expression)
 end
