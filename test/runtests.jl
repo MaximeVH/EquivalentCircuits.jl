@@ -68,8 +68,10 @@ tree = karva_to_tree(encoding,parameters);
   
     # Intial parameters 
     
-    bad_guess = @elapsed begin optparams = parameteroptimisation("[C1,P2]-R3",measurements,frequencies) end
-    x_0 = collect(values(optparams))
-    perfect_guess = @elapsed begin optparams_x0 = parameteroptimisation("[C1,P2]-R3",measurements,frequencies,x0=x_0) end
-    @test perfect_guess <= bad_guess
+    # I had to remove this unit test, as, unfortunately the provision of initial parameters does not reproducibly reduce the runtime of the parameteroptimisation function.
+
+    # bad_guess = @elapsed begin optparams = parameteroptimisation("[C1,P2]-R3",measurements,frequencies) end
+    # x_0 = collect(values(optparams))
+    # perfect_guess = @elapsed begin optparams_x0 = parameteroptimisation("[C1,P2]-R3",measurements,frequencies,x0=x_0) end
+    # @test perfect_guess <= bad_guess
 end
