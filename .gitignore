@@ -3,3 +3,4 @@ circuitlibrary/circuitmetadata.csv
 experiments/
 test.jl
 examples/circuitlib.jl
+Manifest.toml

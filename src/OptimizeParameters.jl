@@ -61,14 +61,17 @@ function parameteroptimisation(circuit::String,measurements,frequencies;x0=nothi
     end
     
     ### Add initial guess if provided ###
-    if !isnothing(x0)
+    if isnothing(x0)
         res = bboptimize(objective, x0; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
+        initial_parameters = best_candidate(res);
+        fitness_1 = best_fitness(res);
     else
-        res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
+        initial_parameters = x0
+        fitness_1 = objective(x0)
+        # res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
     end
  
-    initial_parameters = best_candidate(res)
-    fitness_1 = best_fitness(res)
+    
     ### Second step ###
     inner_optimizer = NelderMead()
     results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 50.0)); #20.0
@@ -88,7 +91,6 @@ The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath to a CSV file con
 the real part of the impedance, the imaginary part of the impedance, and the frequencies corresponding to the measurements.
 The output is NamedTuple of the circuit's components with their corresponding parameter values.
 """
-
 function parameteroptimisation(circuit::String,data::String) 
     meansurement_file = readdlm(data,',')
     # convert the measurement data into usable format.
