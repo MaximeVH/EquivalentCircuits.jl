@@ -46,7 +46,7 @@ julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 1
 julia> parameteroptimisation("R1-[C2,R3-[C4,R5]]",measurements,frequencies)
 (R1 = 19.953805651358255, C2 = 3.999778355811269e-9, R3 = 3400.0089192843684, C4 = 3.999911415903211e-6, R5 = 2495.2493215522577)
 """
-function parameteroptimisation(circuit::String,measurements,frequencies)
+function parameteroptimisation(circuit::String,measurements,frequencies;x0=nothing)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
     initial_parameters = flatten(karva_parameters(elements));
     circfunc = circuitfunction(circuit)
@@ -59,7 +59,14 @@ function parameteroptimisation(circuit::String,measurements,frequencies)
     for (e,(l,u)) in enumerate(zip(lower,upper))
         SR[e] = (l,u)
     end
-    res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=170000,TraceMode = :silent); #70000
+    
+    ### Add initial guess if provided ###
+    if isnothing(x0)
+        res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent); #70000
+    else
+        res = bboptimize(objective, x0; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent); #70000
+    end
+ 
     initial_parameters = best_candidate(res)
     fitness_1 = best_fitness(res)
     ### Second step ###
