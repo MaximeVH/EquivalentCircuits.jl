@@ -61,10 +61,10 @@ function parameteroptimisation(circuit::String,measurements,frequencies;x0=nothi
     end
     
     ### Add initial guess if provided ###
-    if isnothing(x0)
-        res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent); #70000
+    if !isnothing(x0)
+        res = bboptimize(objective, x0; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
     else
-        res = bboptimize(objective, x0; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent); #70000
+        res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
     end
  
     initial_parameters = best_candidate(res)

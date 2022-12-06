@@ -67,8 +67,9 @@ tree = karva_to_tree(encoding,parameters);
     @test length(subcircuits(example_circuit)) == 5 
   
     # Intial parameters 
-    x0 = collect(values(optparams))
+    
     bad_guess = @elapsed begin optparams = parameteroptimisation("[C1,P2]-R3",measurements,frequencies) end
-    perfect_guess = @elapsed begin optparams_x0 = parameteroptimisation("[C1,P2]-R3",measurements,frequencies,x0=collect(values(optparams))) end
+    x_0 = collect(values(optparams))
+    perfect_guess = @elapsed begin optparams_x0 = parameteroptimisation("[C1,P2]-R3",measurements,frequencies,x0=x_0) end
     @test perfect_guess <= bad_guess
 end
