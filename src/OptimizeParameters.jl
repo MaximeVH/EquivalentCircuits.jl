@@ -62,23 +62,19 @@ function parameteroptimisation(circuit::String,measurements,frequencies;x0=nothi
     
     ### Add initial guess if provided ###
     if isnothing(x0)
-        res = bboptimize(objective, x0; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
+        res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
         initial_parameters = best_candidate(res);
         fitness_1 = best_fitness(res);
+         ### Second step ###
+        inner_optimizer = NelderMead()
+        results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 50.0)); #20.0
+        fitness_2 = results.minimum
+        best = results.minimizer
+        parameters = fitness_2 < fitness_1 ? best : initial_parameters
     else
-        initial_parameters = x0
-        fitness_1 = objective(x0)
-        # res = bboptimize(objective; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
+        res = bboptimize(objective, x0; SearchRange = SR, Method = :de_rand_1_bin,MaxSteps=70000,TraceMode = :silent);
+        parameters =  best_candidate(res)
     end
- 
-    
-    ### Second step ###
-    inner_optimizer = NelderMead()
-    results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 50.0)); #20.0
-    fitness_2 = results.minimum
-    best = results.minimizer
-
-    parameters = fitness_2 < fitness_1 ? best : initial_parameters
 
     return parametertuple(circuit,parameters)
 end
