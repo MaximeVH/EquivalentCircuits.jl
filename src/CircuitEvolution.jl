@@ -91,7 +91,11 @@ function evaluate_fitness!(population,measurements,frequencies)
 end
 
 function population_from_string(circuitstring_list, head=8, size=30, terminals="RCLP")
+    if typeof(circuitstring_list) == Vector{Tuple{String, Vector{Float64}}}
+        circuit_pool = [circuit_to_karva(ci[1],ci[2],head=head,terminals=terminals) for ci in circuitstring_list]
+    elseif typeof(circuitstring_list) == Vector{String}
     circuit_pool = [circuit_to_karva(ci,head=head,terminals=terminals) for ci in circuitstring_list]
+    end
     circuitpopulation = Vector{Circuit}(undef,size)
     for c in 1:size
         if c <= length(circuit_pool)
@@ -139,13 +143,13 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 """
 function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing)
     # Either initialize a new population, or work with a provided initial population.
-    @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String}] "The initial population must be a list."
+    @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
     # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
         population = initial_population
-    elseif typeof(initial_population) == Vector{String}
+    elseif typeof(initial_population) in [Vector{String},Vector{Tuple{String, Vector{Float64}}}]
         population = population_from_string(initial_population, head, population_size, terminals)
     end
     # Theoretical simplification of the initial population.
@@ -213,13 +217,13 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
     # Either initialize a new population, or work with a provided initial population.
-    @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String}] "The initial population must be a list."
+    @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
     # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
         population = initial_population
-    elseif typeof(initial_population) == Vector{String}
+    elseif typeof(initial_population) in [Vector{String},Vector{Tuple{String, Vector{Float64}}}]
         population = population_from_string(initial_population, head, population_size, terminals)
     end
     # Theoretical simplification of the initial population.

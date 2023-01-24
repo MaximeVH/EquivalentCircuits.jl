@@ -78,7 +78,7 @@ When only the electochemical impedance measurements are available, equivalent el
 - `terminals` : the circuit components that are to be included in the circuit identification.
 - `cutoff`: a hyperparameter that controls the circuit complexity by removing redundant components. Lower values lead to more simple circuits, however too low values will lead to circuits that no longer fit the measurements well.
 - `head` : a hyperparameter than controls the maximum considered complexity of the circuits.
-- `initial_population` : the option to provide an initial population of circuits with which the algorithm starts.
+- `initial_population` : the option to provide an initial population of circuits with which the algorithm starts, this initial population can be either a list of Circuit objects (as loaded with the loadpopulation function) or a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples where each tuple has the circuit string as first value and the parameters as second value.
 
 The defaults values are as follows:
 
