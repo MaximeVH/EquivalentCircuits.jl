@@ -143,8 +143,7 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 """
 function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing)
     # Either initialize a new population, or work with a provided initial population.
-    @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
-    # Either initialize a new population, or work with a provided initial population.
+    # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
@@ -217,7 +216,7 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
     # Either initialize a new population, or work with a provided initial population.
-    @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
+    # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
     # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)  
         population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
