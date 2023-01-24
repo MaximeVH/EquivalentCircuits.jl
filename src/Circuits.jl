@@ -267,6 +267,46 @@ function exhaustive_search(circuit,circuit_parameters)
     return karva_solutions[1] , parameter_solutions[1] 
 end
 
+function exhaustive_search(circuit)
+    circuit_parameters = circuitparameters(circuit)
+    # Get simulated measurement from the circuit
+    circuit_bare, karva_params, operation_indexes,terminal_indexes = get_karva_elements_and_parameters(circuit,circuit_parameters)
+    simulated_measurement = get_target_impedance(circuit,circuit_parameters)
+   
+    # Get all possible array permutations (the next few parts can be swapped for a heuristic if there are too many permutations).
+    index_permutations = collect(permutations(1:length(circuit_bare)))
+    # Remove permutations that lead to synctactically incorrect circuits.
+    permitted_index_permutations = index_permutations[findall(x-> (x[1] in operation_indexes)&&(x[end] in terminal_indexes)&&(x[end-1] in terminal_indexes),index_permutations)]
+    # Generate the arrays of potential solution.
+    potential_karvas = [circuit_bare[inds] for inds in permitted_index_permutations]
+    potential_paramsets = [karva_params[inds] for inds in permitted_index_permutations] 
+    potential_trees = [karva_to_tree(k,p) for (k,p) in zip(potential_karvas,potential_paramsets)]
+    potential_circuits = [tree_to_circuit(t)[1] for t in potential_trees]
+
+    # Limit the potential solutions to those with a correct circuit configuration.
+    correct_circuits = findall(potential_circuits .== circuit)
+    potential_karvas = potential_karvas[correct_circuits]
+    potential_paramsets = potential_paramsets[correct_circuits]
+    potential_trees = potential_trees[correct_circuits]
+   
+    # Limit the potential solutions to those with a correct function evaluation.
+    potential_functions = [tree_to_function(T) for T in potential_trees];
+    function_evaluations = [f(params,1000) for (f,params) in zip(potential_functions,potential_paramsets)] 
+    correct_evaluations = findall(function_evaluations .== simulated_measurement)
+    potential_karvas = potential_karvas[correct_evaluations]
+    potential_paramsets = potential_paramsets[correct_evaluations]
+    potential_trees = potential_trees[correct_evaluations]
+
+    # Obtain solution(s) with the sortest head. Maybe randomly select one of them.
+    potential_heads = head_length.(potential_karvas)
+    potential_head_minimum = min(potential_heads...)
+    minimal_heads = findall(potential_heads .== potential_head_minimum)
+    karva_solutions = potential_karvas[minimal_heads]
+    parameter_solutions = potential_paramsets[minimal_heads]
+
+    return karva_solutions[1] , parameter_solutions[1] 
+end
+
 function genetic_algorithm(circuit,circuit_parameters,pop_size = 50) #Maybe try to reimplement this with the Evolutionary package.
     # Preliminaries
     circuit_bare, karva_params, operation_indexes,terminal_indexes = get_karva_elements_and_parameters(circuit,circuit_parameters)
@@ -434,7 +474,7 @@ function ordered_restricted_crossover(size,parent1,parent2,operation_indexes,ter
     return child
 end
 
-function circuit_to_karva(circuit,circuit_parameters,head=8)
+function circuit_to_karva(circuit,circuit_parameters;head=8,terminals="RCLP")
     karva = ""
     params = []
     if length(foldl(replace,["["=>"","]"=>"","-"=>"+",","=>"-"], init = denumber_circuit(circuit))) <= 9
@@ -443,9 +483,24 @@ function circuit_to_karva(circuit,circuit_parameters,head=8)
         karva,params = genetic_algorithm(circuit,circuit_parameters)
     end
     amount_to_extend = (2*head+1) - length(karva)
-    extension_karva = String(rand("RCLP",amount_to_extend))
+    extension_karva = String(rand(terminals,amount_to_extend))
     extension_params = karva_parameters(extension_karva)
-    return karva*extension_karva , vcat(params,extension_params)
+    return Circuit(karva*extension_karva , vcat(params,extension_params),nothing)
+end
+
+function circuit_to_karva(circuit;head=8,terminals="RCLP")
+    circuit_parameters = circuitparameters(circuit)
+    karva = ""
+    params = []
+    if length(foldl(replace,["["=>"","]"=>"","-"=>"+",","=>"-"], init = denumber_circuit(circuit))) <= 9
+        karva,params = exhaustive_search(circuit,circuit_parameters)
+    else
+        karva,params = genetic_algorithm(circuit,circuit_parameters)
+    end
+    amount_to_extend = (2*head+1) - length(karva)
+    extension_karva = String(rand(terminals,amount_to_extend))
+    extension_params = karva_parameters(extension_karva)
+    return Circuit(karva*extension_karva , vcat(params,extension_params),nothing)
 end
 
 function get_tree_parameters(tree)
