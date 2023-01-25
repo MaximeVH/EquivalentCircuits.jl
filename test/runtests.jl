@@ -41,7 +41,7 @@ tree = karva_to_tree(encoding,parameters);
 
 @testset "EquivalentCircuits.jl" begin
     # Check the circuit_evolution function.
-    @test library_fit == circuit_evolution(measurements,frequencies,initial_population = library).Circuit
+    @test library_fit == circuit_evolution(measurements,frequencies,initial_population = library).circuitstring
     # Evaluate properties of the generated circuit encoding.
     @test isoperation(encoding[1]) == true
     # Only terminals in the encoding's tail.
