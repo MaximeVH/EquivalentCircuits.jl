@@ -91,8 +91,8 @@ Z_simulated_ImpPy = equiv_circuit_PyObj.predict(f_, use_initial = true)
 Z_Py = py"SimulateEQ"(f_, C1, P2w, P2n, R3)
 
 # --- simulation via package EquivalentCircuits-Package: -------------------------------------------------------------------
-circfunc_ = EquivalentCircuits.circuitfunction(circuitStr_ECircJL)
-Z_ECircJL = EquivalentCircuits.simulateimpedance_noiseless(circfunc_, param_ECircJL, f_)
+circfunc_ = circuitfunction(circuitStr_ECircJL)
+Z_ECircJL = simulateimpedance_noiseless(circfunc_, param_ECircJL, f_)
 
 # --- comparison of results: -----------------------------------------------------------------------------------------------
 ΔQz_ImpPy_Qz_own     = RobustModels.mean(abs.(Z_simulated_ImpPy - Z_sim_own))

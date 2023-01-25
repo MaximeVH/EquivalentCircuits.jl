@@ -57,10 +57,10 @@ Z_simulated_ImpPy = equiv_circuit_PyObj.predict(frequ_data_all, use_initial = tr
 
 
 # --- simulate via ECircJL (EquivalentCircuits.jl): ---------------------------------------------------
-circfunction = EquivalentCircuits.circuitfunction(circuit_model_preset)
-# circfunction = EquivalentCircuits.circuitfunction(circuit_model_preset)
+circfunction = circuitfunction(circuit_model_preset)
+# circfunction = circuitfunction(circuit_model_preset)
 
-Z_simulated_ECircJL = EquivalentCircuits.simulateimpedance_noiseless(circfunction, circuit_params_preset, frequ_data_all);
+Z_simulated_ECircJL = simulateimpedance_noiseless(circfunction, circuit_params_preset, frequ_data_all);
 
 Q_ImpPy_ECircJL = RobustModels.mean(abs.(Z_simulated_ImpPy - Z_simulated_ECircJL))
 println(" Δ(Q_ImpPy - Q_ECircJL): ", Q_ImpPy_ECircJL)

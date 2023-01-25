@@ -59,8 +59,8 @@ end
 
 # --- simulate impedance, based on given equivalent-circuit model via own function:
 function _simulate_impedance(_in_frequ_vec::Vector{<:Number}, _circuit_str::AbstractString, _parameters_in::NamedTuple)
-    _circfunc = EquivalentCircuits.circuitfunction(_circuit_str)
-    return EquivalentCircuits.simulateimpedance_noiseless(_circfunc, _parameters_in, _in_frequ_vec)
+    _circfunc = circuitfunction(_circuit_str)
+    return simulateimpedance_noiseless(_circfunc, _parameters_in, _in_frequ_vec)
 end
 
 function _build_NamedTuple(_circuit_model_preset::String, _param_vec::Vector{<:Number})
@@ -141,13 +141,13 @@ if b_run_EC_evolution || ~isfile(nf_equ_circ_evo)
         global equiv_circ_vec
         println("#: ", i_)
         println("  DBG#: 1") # sometimes I have observed chrashes.
-        i_equiv_circ_evo  = EquivalentCircuits.circuitevolution(Z_data, frequ_data, terminals=terminals_, generations=25, population_size=100, head=head_)
+        i_equiv_circ_evo  = circuitevolution(Z_data, frequ_data, terminals=terminals_, generations=25, population_size=100, head=head_)
         println("  DBG#: 2")
         # --- simulate Impedance:
-        _circfunc_evo    = EquivalentCircuits.circuitfunction(i_equiv_circ_evo.Circuit)
+        _circfunc_evo    = circuitfunction(i_equiv_circ_evo.Circuit)
         println("  DBG#: 3")
         # --- Calc quality as the mean of the distances between measured and simulated impedance:
-        _impedance_evo_data_pts = EquivalentCircuits.simulateimpedance_noiseless(_circfunc_evo, i_equiv_circ_evo.Parameters, frequ_data)
+        _impedance_evo_data_pts = simulateimpedance_noiseless(_circfunc_evo, i_equiv_circ_evo.Parameters, frequ_data)
         println("  DBG#: 4")
         i_Q              = RobustModels.mean(abs.(Z_data - _impedance_evo_data_pts))
         # ---

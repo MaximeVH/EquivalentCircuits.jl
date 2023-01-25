@@ -23,8 +23,8 @@ else
 end
 
 # --- simulate impedance based on suitable preset of a circuit model and its corresponding parameter-set: 
-circfunc_preset = EquivalentCircuits.circuitfunction(circuit_model_preset)
-impedance_preset = EquivalentCircuits.simulateimpedance_noiseless(circfunc_preset, circuit_params_preset, frequ_vec)
+circfunc_preset = circuitfunction(circuit_model_preset)
+impedance_preset = simulateimpedance_noiseless(circfunc_preset, circuit_params_preset, frequ_vec)
 
 real_part = real(impedance_preset)
 # imag_part = - imag(impedance_preset) 
