@@ -24,11 +24,11 @@ function optimizeparameters(objective,initial_parameters,upper)
 end
 
 """
-    parameteroptimisation(circuit::String,measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1})
+    parameteroptimisation(circuitstring::String,measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1})
    
 Fit the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
 
-The inputs are a circuit (e.g. "R1-[C2,R3]-P4"), an array of complex-valued impedance measurements and their corresponding frequencies.
+The inputs are the string representation of a circuit (e.g. "R1-[C2,R3]-P4"), an array of complex-valued impedance measurements and their corresponding frequencies.
 The output is NamedTuple of the circuit's components with their corresponding parameter values.
 
 # Example
@@ -46,13 +46,13 @@ julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 1
 julia> parameteroptimisation("R1-[C2,R3-[C4,R5]]",measurements,frequencies)
 (R1 = 19.953805651358255, C2 = 3.999778355811269e-9, R3 = 3400.0089192843684, C4 = 3.999911415903211e-6, R5 = 2495.2493215522577)
 """
-function parameteroptimisation(circuit::String,measurements,frequencies;x0=nothing)
-    elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
+function parameteroptimisation(circuitstring::String,measurements,frequencies;x0=nothing)
+    elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuitstring))
     initial_parameters = flatten(karva_parameters(elements));
-    circfunc = circuitfunction(circuit)
+    circfunc = circuitfunction(circuitstring)
     objective = objectivefunction(circfunc,measurements,frequencies) 
     lower = zeros(length(initial_parameters))
-    upper = get_parameter_upper_bound(circuit)
+    upper = get_parameter_upper_bound(circuitstring)
 
     ### First step ###
     SR = Array{Tuple{Float64,Float64},1}(undef,length(initial_parameters))
@@ -76,18 +76,18 @@ function parameteroptimisation(circuit::String,measurements,frequencies;x0=nothi
         parameters =  best_candidate(res)
     end
 
-    return parametertuple(circuit,parameters)
+    return parametertuple(circuitstring,parameters)
 end
 """
-    parameteroptimisation(circuit::String,filepath::String)
+    parameteroptimisation(circuitstring::String,filepath::String)
 
 Fit the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
 
-The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath to a CSV file containing the three following columns: 
+The inputs are the string representation of a circuit (e.g. "R1-[C2,R3]-P4") and a filepath to a CSV file containing the three following columns: 
 the real part of the impedance, the imaginary part of the impedance, and the frequencies corresponding to the measurements.
 The output is NamedTuple of the circuit's components with their corresponding parameter values.
 """
-function parameteroptimisation(circuit::String,data::String) 
+function parameteroptimisation(circuitstring::String,data::String) 
     meansurement_file = readdlm(data,',')
     # convert the measurement data into usable format.
     reals = meansurement_file[:,1]
@@ -95,12 +95,12 @@ function parameteroptimisation(circuit::String,data::String)
     frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
 #   generate initial parameters.
-    elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
+    elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuitstring))
     initial_parameters = flatten(karva_parameters(elements));
-    circfunc = circuitfunction(circuit)
+    circfunc = circuitfunction(circuitstring)
     objective = objectivefunction(circfunc,measurements,frequencies) 
     lower = zeros(length(initial_parameters))
-    upper = get_parameter_upper_bound(circuit)
+    upper = get_parameter_upper_bound(circuitstring)
     ### First step ###
     SR = Array{Tuple{Float64,Float64},1}(undef,length(initial_parameters))
     for (e,(l,u)) in enumerate(zip(lower,upper))
@@ -117,7 +117,7 @@ function parameteroptimisation(circuit::String,data::String)
 
     parameters = fitness_2 < fitness_1 ? best : initial_parameters
 
-    return parametertuple(circuit,parameters)
+    return parametertuple(circuitstring,parameters)
 end
 
 function deflatten_parameters(parameters,tree,param_inds)

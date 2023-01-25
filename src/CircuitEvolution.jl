@@ -1,9 +1,16 @@
+"""
+EquivalentCircuit(circuitstring::String, Parameters::NamedTuple)   
+   
+A structure used as the output of the evolutionary algorithm. It's fields are 'circuitstring', which is the string representation of a circuit (e.g. "R1-[C2,R3]-P4")
+and 'Parameters', a NamedTuple with the circuit's components and their corresponding parameter values.
+
+"""
 struct EquivalentCircuit
-    Circuit::String
+    circuitstring::String
     Parameters::NamedTuple
 end
 
-Base.display(circuit::EquivalentCircuit) = println(circuit.Circuit)
+Base.display(circuit::EquivalentCircuit) = println(circuit.circuitstring)
 
 function parametertuple(circuit,parameters)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
@@ -113,7 +120,7 @@ circuit_evolution(measurements::Array{Complex{Float64},1},frequencies::Array{Flo
 Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements. 
 
 The inputs are a circuit (e.g. "R1-[C2,R3]-P4") an array of complex-valued impedance measurements and their corresponding
-frequencies. The output is a EquivalentCircuit object containing a field Circuit, which is a string denoting the identified circuit
+frequencies. The output is an EquivalentCircuit object containing a field circuitstring, which is a string denoting the identified circuit
 and a field Parameters, which is a NamedTuple of the circuit's components with their corresponding parameter values.
 
 # Arguments
@@ -123,7 +130,9 @@ and a field Parameters, which is a NamedTuple of the circuit's components with t
 - `head::Integer=8`: a hyperparameter than controls the maximum considered complexity of the circuits.
 - `cutoff::Float64=0.8`: a hyperparameter that controls the circuit complexity by removing redundant components.
 - `initial_population::Array{Circuit,1}=nothing`:the option to provide an initial population of circuits
-(obtained by using the loadpopulation function) with which the algorithm starts.
+(obtained by using the loadpopulation function) with which the algorithm starts. 
+ Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
+ where each tuple has the circuit string as first value and the parameters as second value.
 
 # Example
 ```julia
@@ -203,7 +212,9 @@ end
 - `head::Integer=8`: a hyperparameter than controls the maximum considered complexity of the circuits.
 - `cutoff::Float64=0.8`: a hyperparameter that controls the circuit complexity by removing redundant components.
 - `initial_population::Array{Circuit,1}=nothing`:the option to provide an initial population of circuits
-(obtained by using the loadpopulation function) with which the algorithm starts.
+(obtained by using the loadpopulation function) with which the algorithm starts. 
+ Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
+ where each tuple has the circuit string as first value and the parameters as second value.
 
 """
 

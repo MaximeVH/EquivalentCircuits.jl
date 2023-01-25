@@ -19,12 +19,12 @@ When using this package, the circuit should input as a String:
 ```julia
 using EquivalentCircuits
 
-circuit = "R1-[C2,R3-[C4,R5]]"
+circuitstring = "R1-[C2,R3-[C4,R5]]"
 ```
 
 ### Parameter fitting
 When an appropriate circuit model is available, the parameters can be fitted to experimental data using the `parameteroptimisation` function which accepts two arguments:
-- `circuit` : the equivalent circuit, provided as a string with the circuit notation displayed above.
+- `circuitstring` : the equivalent circuit, provided as a string with the circuit notation displayed above.
 - `data` : the filepath of the electrochemical impedance measurement data.
 The data should be provided as a CSV file with three columns: imaginary impedance, real impedance and frequency (see example_measurements.csv).
 
@@ -51,7 +51,7 @@ println(df)
 
 Next we can fit the parameters of our example ciruit to the example measurement data as follows:
 ```julia
-circuitparams = parameteroptimisation(circuit,data)
+circuitparams = parameteroptimisation(circuitstring,data)
 ```
 Some users may find it more convenient to directly input the complex-valued impedance measurements and their corresponding frequency values to the function vectors. This is illustrated below.
 
@@ -60,7 +60,7 @@ measurements = [5919.90 - 15.79im, 5919.58 - 32.68im, 5918.18 - 67.58im, 5912.24
 
 frequencies = [0.10, 0.21, 0.43, 0.89, 1.83, 3.79, 7.85, 16.24, 33.60, 69.52, 143.84, 297.64, 615.85, 1274.27, 2636.65, 5455.59, 11288.38, 23357.21, 48329.30, 100000.00]
 
-circuitparams = parameteroptimisation(circuit,measurements,frequencies)
+circuitparams = parameteroptimisation(circuitstring,measurements,frequencies)
 ```
 ### Circuit literature search
 The compatibility of a given set of impedance measurements with circuits from similar applications is evaluated with the `circuit_search(data,domain;kwargs)` function.  Users can finetune the search by restricting the complexity and element composition of the returned circuits. The function returns the compatible circuits along with their Digital Object Identifier (DOI) so that users can examine the circuits' other uses to further evaluate its suitability. An overview of the function's inputs is provided below:
@@ -71,7 +71,7 @@ The compatibility of a given set of impedance measurements with circuits from si
 - `max_complexity`  : a hyperparameter than controls the maximum considered complexity of the circuits.
 
 ### Circuit fitting
-When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be also be obtained using the `circuit_evolution(data;kwargs)` function. The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
+When only the electochemical impedance measurements are available, equivalent electrical circuit recommendations can be also be obtained using the `circuit_evolution(data;kwargs)` function. Details on the algorithm can be found in the [paper](https://ieeexplore.ieee.org/document/9539171). The data can once again be provided as a CSV file's filepath. A variety of keyword arguments can be adjusted to fine-tune the gene expression programming circuit identification procedure.The possible keyword agruments to tune the cirucit identification are:
 
 - `generations` : the maximum number of algorithm iterations.
 - `population_size` : the number of individuals in the population during each iteration.

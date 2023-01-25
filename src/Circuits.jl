@@ -1,3 +1,13 @@
+"""
+ Circuit(karva::String, parameters::Vector{Any}, fitness::Union{Nothing, AbstractFloat})   
+   
+The mutable structure representation of circuits that is used by the evolutionary algorithm. 
+
+The fields are the circuit encoding used by the gene expression programming (GEP) algorithm which is also known as "karva", the parameters of the 
+operations (these are all zeros) and terminals (these correspond to the circuit component parameters) in the circuit encoding, and the fitness value. The latter is 
+initialized as `nothing`, but is replaced by a measure of how well a circuit fits to a given set of impedance measurements during the iterations of the GEP algorithm.
+
+"""
 mutable struct Circuit 
     karva::String
     parameters::Array{Any,1}
