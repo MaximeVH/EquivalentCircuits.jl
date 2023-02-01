@@ -2,7 +2,7 @@ module EquivalentCircuits
 
     export circuit_evolution, circuit_search
     export parameteroptimisation, circuitfunction
-    export loadpopulation
+    export loadpopulation, get_parameter_upper_bound
     export simulateimpedance_noiseless
     export Circuit, EquivalentCircuit
     using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim
