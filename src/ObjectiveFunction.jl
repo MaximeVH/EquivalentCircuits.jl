@@ -1,14 +1,16 @@
 """
-objectivefunction(circuitfunc,measurements,frequencies)
+objectivefunction(circuitfunc,measurements,frequencies,weights=nothing)
 Returns the Least squares objective function between the measurements and a circuit's simulated
 impedance for a given set of circuit parameters at a specified range of experimental frequencies.
-This function is used to optimize the circuit parameters.
+This function is used to optimize the circuit parameters. A vector of weights can optionally be provided to the function
+if more importance is to be given to certain frequencies during optimisation.
 
 """
-function objectivefunction(circuitfunc,measurements,frequencies) 
+function objectivefunction(circuitfunc,measurements,frequencies,weights=nothing) 
+    if isnothing(weights) ; weights = ones(length(frequencies)) ; end
     function objective(x)
         model_output = [circuitfunc(x,fr) for fr in frequencies] 
-        return  mean((abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2))
+        return  mean(weights .* (abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2))
     end
     return objective
 end
@@ -73,3 +75,11 @@ function objectivefunction7(circuitfunc,measurements,frequencies)
     end
     return objective
 end 
+
+function objectivefunction_noweight(circuitfunc,measurements,frequencies) 
+    function objective(x)
+        model_output = [circuitfunc(x,fr) for fr in frequencies] 
+        return  mean((abs.(measurements - model_output).^2)./(abs.(measurements).^2 .+ abs.(model_output).^2))
+    end
+    return objective
+end

@@ -46,11 +46,11 @@ julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 1
 julia> parameteroptimisation("R1-[C2,R3-[C4,R5]]",measurements,frequencies)
 (R1 = 19.953805651358255, C2 = 3.999778355811269e-9, R3 = 3400.0089192843684, C4 = 3.999911415903211e-6, R5 = 2495.2493215522577)
 """
-function parameteroptimisation(circuitstring::String,measurements,frequencies;x0=nothing)
+function parameteroptimisation(circuitstring::String,measurements,frequencies;x0=nothing,weights = nothing)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuitstring))
     initial_parameters = flatten(karva_parameters(elements));
     circfunc = circuitfunction(circuitstring)
-    objective = objectivefunction(circfunc,measurements,frequencies) 
+    objective = objectivefunction(circfunc,measurements,frequencies,weights) 
     lower = zeros(length(initial_parameters))
     upper = get_parameter_upper_bound(circuitstring)
 
@@ -87,7 +87,7 @@ The inputs are the string representation of a circuit (e.g. "R1-[C2,R3]-P4") and
 the real part of the impedance, the imaginary part of the impedance, and the frequencies corresponding to the measurements.
 The output is NamedTuple of the circuit's components with their corresponding parameter values.
 """
-function parameteroptimisation(circuitstring::String,data::String) 
+function parameteroptimisation(circuitstring::String,data::String,weights) 
     meansurement_file = readdlm(data,',')
     # convert the measurement data into usable format.
     reals = meansurement_file[:,1]
@@ -98,7 +98,7 @@ function parameteroptimisation(circuitstring::String,data::String)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuitstring))
     initial_parameters = flatten(karva_parameters(elements));
     circfunc = circuitfunction(circuitstring)
-    objective = objectivefunction(circfunc,measurements,frequencies) 
+    objective = objectivefunction(circfunc,measurements,frequencies,weights) 
     lower = zeros(length(initial_parameters))
     upper = get_parameter_upper_bound(circuitstring)
     ### First step ###
