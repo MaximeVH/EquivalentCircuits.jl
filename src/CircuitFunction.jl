@@ -46,6 +46,17 @@ function circuitfunction(circuitstring)
     return mk_function([:T,:f],[],circuit_expression)
 end
 
+function circtuitfunction_fixed_params(circuitstring,param_indices,param_values)
+    temp_circ_func = circuitfunction(circuitstring)
+    function fixed_param_function(parameters,frequency)
+        for (idx,val) in zip(param_indices,param_values)
+            parameters[idx] = val
+        end
+        return temp_circ_func(parameters,frequency)
+    end
+    return fixed_param_function
+end
+
 function tree_to_function(tree_array)
     dictionary_of_calculations = Dict('R'=>"T",'C'=>"(1/(2im*π*f*"*"T"*"))",'L'=>"(2im*π*f*"*"T"*")",'P'=>"(1/(T[1]*(2im*π*f)^T[2]))") 
     tree = copy(tree_array) 

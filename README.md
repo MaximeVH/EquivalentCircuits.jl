@@ -23,9 +23,15 @@ circuitstring = "R1-[C2,R3-[C4,R5]]"
 ```
 
 ### Parameter fitting
-When an appropriate circuit model is available, the parameters can be fitted to experimental data using the `parameteroptimisation` function which accepts two arguments:
+When an appropriate circuit model is available, the parameters can be fitted to experimental data using the `parameteroptimisation` function which accepts two mandatory arguments:
 - `circuitstring` : the equivalent circuit, provided as a string with the circuit notation displayed above.
 - `data` : the filepath of the electrochemical impedance measurement data.
+  
+Furthermore, there are three optional keyword arguments for increased functionality:
+- `x0`: An optional initial parameterset
+- `weights`: A vector of equal length as the frequencies. This can be used to attatch more importance to specific areas within the frequency range.
+- `fixed_params`: A tuple with the indices of the parameters that are to be fixed during the optimisation and the corresponding fixed parameter values.
+
 The data should be provided as a CSV file with three columns: imaginary impedance, real impedance and frequency (see example_measurements.csv).
 
 Lets first take a look at what the çontents of the [example_measurements.csv](https://github.com/MaximeVH/EquivalentCircuits.jl/blob/master/example_measurements.csv) file look like:

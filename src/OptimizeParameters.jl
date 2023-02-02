@@ -24,12 +24,16 @@ function optimizeparameters(objective,initial_parameters,upper)
 end
 
 """
-    parameteroptimisation(circuitstring::String,measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1})
+    parameteroptimisation(circuitstring::String,measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1},;x0=nothing,weights = nothing, fixed_params = nothing)
    
 Fit the parameters of a given equivalent circuit to measurement values, using the Nelder-Mead simplex algorithm.
 
 The inputs are the string representation of a circuit (e.g. "R1-[C2,R3]-P4"), an array of complex-valued impedance measurements and their corresponding frequencies.
-The output is NamedTuple of the circuit's components with their corresponding parameter values.
+The output is NamedTuple of the circuit's components with their corresponding parameter values. Three optional keyword arguments are:
+
+- `x0`: An optional initial parameterset
+- `weights`: A vector of equal length as the frequencies. This can be used to attatch more importance to specific areas within the frequency range.
+- `fixed_params`: A tuple with the indices of the parameters that are to be fixed during the optimisation and the corresponding fixed parameter values.
 
 # Example
 ```julia
@@ -46,10 +50,14 @@ julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 1
 julia> parameteroptimisation("R1-[C2,R3-[C4,R5]]",measurements,frequencies)
 (R1 = 19.953805651358255, C2 = 3.999778355811269e-9, R3 = 3400.0089192843684, C4 = 3.999911415903211e-6, R5 = 2495.2493215522577)
 """
-function parameteroptimisation(circuitstring::String,measurements,frequencies;x0=nothing,weights = nothing)
+function parameteroptimisation(circuitstring::String,measurements,frequencies;x0=nothing,weights = nothing, fixed_params = nothing)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuitstring))
     initial_parameters = flatten(karva_parameters(elements));
-    circfunc = circuitfunction(circuitstring)
+    if isnothing(fixed_params)
+        circfunc = circuitfunction(circuitstring)
+    else
+        circfunc = circtuitfunction_fixed_params(circuitstring,fixed_params[1],fixed_params[2])
+    end
     objective = objectivefunction(circfunc,measurements,frequencies,weights) 
     lower = zeros(length(initial_parameters))
     upper = get_parameter_upper_bound(circuitstring)
@@ -87,7 +95,7 @@ The inputs are the string representation of a circuit (e.g. "R1-[C2,R3]-P4") and
 the real part of the impedance, the imaginary part of the impedance, and the frequencies corresponding to the measurements.
 The output is NamedTuple of the circuit's components with their corresponding parameter values.
 """
-function parameteroptimisation(circuitstring::String,data::String,weights) 
+function parameteroptimisation(circuitstring::String,data::String;weights = nothing, fixed_params = nothing) 
     meansurement_file = readdlm(data,',')
     # convert the measurement data into usable format.
     reals = meansurement_file[:,1]
@@ -97,7 +105,11 @@ function parameteroptimisation(circuitstring::String,data::String,weights)
 #   generate initial parameters.
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuitstring))
     initial_parameters = flatten(karva_parameters(elements));
-    circfunc = circuitfunction(circuitstring)
+    if isnothing(fixed_params)
+        circfunc = circuitfunction(circuitstring)
+    else
+        circfunc = circtuitfunction_fixed_params(circuitstring,fixed_params[1],fixed_params[2])
+    end
     objective = objectivefunction(circfunc,measurements,frequencies,weights) 
     lower = zeros(length(initial_parameters))
     upper = get_parameter_upper_bound(circuitstring)
