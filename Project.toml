@@ -1,7 +1,7 @@
 name = "EquivalentCircuits"
 uuid = "aac5d7a0-6a88-46d8-ae66-3950776e4615"
 authors = ["Maxime Van Haeverbeke", "Stefan Pofahl"]
-version = "0.2.1"
+version = "0.3.1"
 
 [deps]
 BlackBoxOptim = "a134a8b2-14d6-55f6-9291-3336d3ab0209"
