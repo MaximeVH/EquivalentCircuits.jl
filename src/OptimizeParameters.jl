@@ -9,7 +9,7 @@ function get_parameter_upper_bound(readablecircuit::String)
     return flatten([ranges[e] for e in elements])
 end
 
-function get_parameter_upper_bound(readablecircuit::String, ranges = ::Dict)
+function get_parameter_upper_bound(readablecircuit::String, ranges::Dict{Char, Any})
     ranges['+'] = 0; ranges['-'] = 0;
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(readablecircuit))
     return flatten([ranges[e] for e in elements])
