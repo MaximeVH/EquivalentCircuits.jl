@@ -5,3 +5,4 @@ experiments/
 test.jl
 examples/circuitlib.jl
 Manifest.toml
+EquivalentCircuits.jl.code-workspace
