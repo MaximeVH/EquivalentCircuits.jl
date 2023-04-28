@@ -1,3 +1,6 @@
+simulate_circuit(circ,param,freq) = simulateimpedance_noiseless(circuitfunction(circ),param,freq) 
+
+simulate_noisy_circuit(circ,param,freq,noise=0.01) = simulateimpedance(circuitfunction(circ),param,freq,noise)
 
 """
 simulateimpedance_noiseless(circuitfunc::ggfunc-function,parameters::Vector{Any},frequencies::Array{Float64,1}) 
