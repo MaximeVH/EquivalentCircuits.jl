@@ -133,6 +133,7 @@ and a field Parameters, which is a NamedTuple of the circuit's components with t
 (obtained by using the loadpopulation function) with which the algorithm starts. 
  Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
  where each tuple has the circuit string as first value and the parameters as second value.
+ - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
 
 # Example
 ```julia
@@ -150,7 +151,7 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 [R1,C2]-[C3,R4]-R5
 ```
 """
-function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing)
+function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4)
     # Either initialize a new population, or work with a provided initial population.
     # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
     if isnothing(initial_population)  
@@ -164,8 +165,7 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
         simplifypopulation!(population,terminals) 
         evaluate_fitness!(population,measurements,frequencies)
         sort!(population)
-        generation = 0
-        convergence_threshold = 5e-4 
+        generation = 0 
         # Keep track of the fittest individual circuit.
         elite = minimum(population)
         min_fitness = elite.fitness
@@ -215,10 +215,12 @@ end
 (obtained by using the loadpopulation function) with which the algorithm starts. 
  Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
  where each tuple has the circuit string as first value and the parameters as second value.
+ - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
+
 
 """
 
-function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing)
+function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing,convergence_threshold=5e-4)
     # Read the measurement file.
     meansurement_file = readdlm(filepath,',')
     # convert the measurement data into usable format.
@@ -242,7 +244,6 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     evaluate_fitness!(population,measurements,frequencies)
     sort!(population)
     generation = 0
-    convergence_threshold = 5e-4 
     # Keep track of the fittest individual circuit.
     elite = minimum(population)
     min_fitness = elite.fitness
