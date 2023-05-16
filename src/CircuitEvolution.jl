@@ -29,11 +29,11 @@ function parametertuple(circuit,parameters)
     return NamedTuple{name_symbols}(Tuple(parameters))
 end
 
-function initializecircuit(head=8,terminals="RCLP")
-    karva = generatekarva(head,terminals) 
-    parameters = karva_parameters(karva)
-    return Circuit(karva,parameters,nothing)
-end
+# function initializecircuit(head=8,terminals="RCLP")
+#     karva = generatekarva(head,terminals) 
+#     parameters = karva_parameters(karva)
+#     return Circuit(karva,parameters,nothing)
+# end
 
 function initializecircuit(bounds,head=8,terminals="RCLP")
     karva = generatekarva(head,terminals) 
@@ -41,21 +41,21 @@ function initializecircuit(bounds,head=8,terminals="RCLP")
     return Circuit(karva,parameters,nothing)
 end
 
-function initializepopulation(size=20,head=8,terminals="RCLP")
-    return [initializecircuit(head,terminals) for i in 1:size]
-end
+# function initializepopulation(size=20,head=8,terminals="RCLP")
+#     return [initializecircuit(head,terminals) for i in 1:size]
+# end
 
 function initializepopulation(bounds,size=20,head=8,terminals="RCLP")
     return [initializecircuit(bounds,head,terminals) for i in 1:size]
 end
 
-function initializevariedpopulation(size=30,head=8)
-    subpopulation_size = floor(Int(size/3))
-    RCs = initializepopulation(subpopulation_size,head,"RC")
-    RCLs = initializepopulation(subpopulation_size,head,"RCL")
-    RCLPs = initializepopulation(subpopulation_size,head,"RCLP")
-    return vcat(RCs,RCLs,RCLPs)
-end
+# function initializevariedpopulation(size=30,head=8)
+#     subpopulation_size = floor(Int(size/3))
+#     RCs = initializepopulation(subpopulation_size,head,"RC")
+#     RCLs = initializepopulation(subpopulation_size,head,"RCL")
+#     RCLPs = initializepopulation(subpopulation_size,head,"RCLP")
+#     return vcat(RCs,RCLs,RCLPs)
+# end
 
 function simplifypopulation!(population,terminals="RCPL")
     for circuit in population

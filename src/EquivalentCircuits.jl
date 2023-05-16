@@ -18,7 +18,8 @@ module EquivalentCircuits
     include("CircuitSimplification.jl")
     include("CircuitLibrary.jl")
     include("RedundancyTesting.jl")
-    include("CircuitEvolution.jl")
     include("Miscellaneous.jl")
+    include("CircuitEvolution.jl")
+
 
 end
