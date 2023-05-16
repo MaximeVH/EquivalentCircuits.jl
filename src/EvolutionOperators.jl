@@ -39,7 +39,7 @@ function mutate(circuit,terminals = "RCLP")
 end
 
 function replacementparameter(element)
-    ranges= Dict('R'=>1000,'C'=>0.001,'L'=>1,'P'=>[100,0.99999],'+'=>0,'-'=>0)
+    ranges= Dict('R'=>1000,'C'=>0.001,'L'=>1,'P'=>[100,0.99999],'W'=>100,'+'=>0,'-'=>0)
     return rand().*ranges[element]
 end
 

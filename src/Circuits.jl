@@ -38,7 +38,7 @@ function number_circuit(circuit)
 end
 
 isoperation(chr) = occursin(chr,"-+")
-isterminal(chr) = occursin(chr,"RCLP")
+isterminal(chr) = occursin(chr,"RCLPW")
 
 function generatekarva(head,terminals="RCLP")
     operators =  "+-+-"
