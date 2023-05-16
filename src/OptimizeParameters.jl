@@ -22,8 +22,21 @@ function func_and_params_for_optim(tree)
     return circuitfunc, flatten(circuit_parameters) , flatten(upperbounds) , param_inds
 end
 
+function func_and_params_for_optim(tree,bounds) 
+    circuit,circuit_parameters,param_inds = tree_to_circuit_with_inds(tree)
+    circuitfunc = circuitfunction(circuit)
+    lowers, uppers = get_parameter_bounds(tree,bounds)
+    return circuitfunc, flatten(circuit_parameters) , flatten(lowers[param_inds]),flatten(uppers[param_inds]) ,param_inds
+end
+
 function optimizeparameters(objective,initial_parameters,upper)
     lower = zeros(length(initial_parameters))
+    inner_optimizer = NelderMead() 
+    results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 20.0))
+    return results.minimizer,results.minimum 
+end
+
+function optimizeparameters(objective,initial_parameters,lower,upper)
     inner_optimizer = NelderMead() 
     results = optimize(objective, lower, upper, initial_parameters, Fminbox(inner_optimizer), Optim.Options(time_limit = 20.0))
     return results.minimizer,results.minimum 

@@ -47,17 +47,41 @@ function generatekarva(head,terminals="RCLP")
     return karva
 end
 
-function karva_parameters(karva) 
+function karva_parameters(karva)  #deprecated
     parameters = Array{Any}(undef, length(karva))
     ranges = Dict('R'=>4000,'C'=> 0.0001,'L'=> 1,'+'=> 0,'-'=> 0,'P'=>[4000,1], 'W'=>4000)
     for (e,i) in enumerate(karva)
             if e == 'P'
-                Element_values[n] = [ranges[e][1]*rand(),ranges[e][2]*rand()]
+                parameters[n] = [ranges[e][1]*rand(),ranges[e][2]*rand()]
             else
             parameters[e] = rand()*ranges[i]
         end
     end
     return parameters
+end
+
+function sample_exponential(a, b, rate)
+    range_val = b - a
+    y = rand()
+    x = -1 / rate * log(1 - y)
+    sampled_value = a + (range_val * x)
+    return sampled_value
+end
+
+randrange(a, b) = sample_exponential(a, b, 10)
+function karva_parameters_(karva,bounds) #initialize with random values within the bounds
+   lower,upper = get_karva_bounds(karva,bounds)
+   parameters = Array{Any}(undef, length(karva))
+   for (e,i) in enumerate(karva)
+       if isoperation(i)
+           parameters[e] = 0
+       elseif i == 'P'
+               parameters[e] = [randrange(lower[e][1], upper[e][1]),randrange(lower[e][2], upper[e][2])]
+           else
+           parameters[e] = randrange(lower[e], upper[e]) 
+       end
+   end
+   return parameters
 end
 
 function karva_to_tree(karva,parameters)

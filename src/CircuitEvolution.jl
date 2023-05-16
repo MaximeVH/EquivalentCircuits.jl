@@ -35,8 +35,18 @@ function initializecircuit(head=8,terminals="RCLP")
     return Circuit(karva,parameters,nothing)
 end
 
+function initializecircuit(bounds,head=8,terminals="RCLP")
+    karva = generatekarva(head,terminals) 
+    parameters = karva_parameters_(karva,bounds)
+    return Circuit(karva,parameters,nothing)
+end
+
 function initializepopulation(size=20,head=8,terminals="RCLP")
     return [initializecircuit(head,terminals) for i in 1:size]
+end
+
+function initializepopulation(bounds,size=20,head=8,terminals="RCLP")
+    return [initializecircuit(bounds,head,terminals) for i in 1:size]
 end
 
 function initializevariedpopulation(size=30,head=8)
@@ -66,6 +76,15 @@ function circuit_offspring(circuit_1,circuit_2,terminals = "RCLP")
     return mutate(offspring,terminals)
 end
 
+function circuitfitness(circuit,measurements,frequencies,bounds)
+    tree = get_circuit_tree(circuit)
+    circfunc,params,lower,upper,param_inds = func_and_params_for_optim(tree,bounds)
+    objective = objectivefunction_noweight(circfunc,measurements,frequencies)
+    optparams,fitness = optimizeparameters(objective,params,lower,upper)
+    optparams = max.(min.(optparams,upper),lower.+10^-15) #workaround of optim.jl's bug 
+    return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds 
+end
+
 function circuitfitness(circuit,measurements,frequencies)
     tree = get_circuit_tree(circuit)
     circfunc,params,upper,param_inds = func_and_params_for_optim(tree)
@@ -86,6 +105,27 @@ function generate_offspring(population,terminals="RCLP")
         offspring[e] = circuit_offspring(progenitors[e],progenitors[mating_pool_size-e+1],terminals)
     end
     vcat(elites,offspring)
+end
+
+function get_parameter_bounds(tree,bounds)
+    lowers = [bounds[node.Type][1] for node in tree]
+    uppers=  [bounds[node.Type][2] for node in tree]
+    return lowers,uppers
+end
+
+function get_karva_bounds(karva,bounds)
+    lowers = [bounds[k][1] for k in karva]
+    uppers=  [bounds[k][2] for k in karva]
+    return lowers,uppers
+end
+
+function evaluate_fitness!(population,measurements,frequencies,bounds)
+    params = []
+    param_inds = []
+    for circuit in population 
+        params,circuit.fitness,param_inds = @suppress circuitfitness(circuit,measurements,frequencies,bounds)
+        circuit.parameters[param_inds] = params
+    end 
 end
 
 function evaluate_fitness!(population,measurements,frequencies)
@@ -134,7 +174,7 @@ and a field Parameters, which is a NamedTuple of the circuit's components with t
  Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
  where each tuple has the circuit string as first value and the parameters as second value.
  - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
-
+- `bounds`::Dict{Char, Vector}: Optional custom bounds for the circuit component parameter values.
 # Example
 ```julia
 
@@ -151,11 +191,17 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 [R1,C2]-[C3,R4]-R5
 ```
 """
-function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4)
+function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing)
+    parameter_bounds = Dict('R'=>[0,1.0e9],'C'=>[0,10],'L'=>[0,5],'P'=>[[0,0],[1.0e9,1]],'W'=>[0,1.0e9],'+'=>[0,0],'-'=>[0,0])
+    if typeof(bounds) == Dict{Char, Vector}
+        for key in keys(bounds)
+            parameter_bounds[key] = bounds[key]
+        end
+    end
     # Either initialize a new population, or work with a provided initial population.
     # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
     if isnothing(initial_population)  
-        population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+        population = initializepopulation(parameter_bounds,population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
         population = initial_population
     elseif typeof(initial_population) in [Vector{String},Vector{Tuple{String, Vector{Float64}}}]
@@ -163,7 +209,7 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
     end
     # Theoretical simplification of the initial population.
         simplifypopulation!(population,terminals) 
-        evaluate_fitness!(population,measurements,frequencies)
+        evaluate_fitness!(population,measurements,frequencies,parameter_bounds)
         sort!(population)
         generation = 0 
         # Keep track of the fittest individual circuit.
@@ -172,17 +218,17 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
         while (min_fitness > convergence_threshold) && (generation<=generations)
             population = generate_offspring(population,terminals)
             simplifypopulation!(population,terminals)
-            evaluate_fitness!(population,measurements,frequencies)
+            evaluate_fitness!(population,measurements,frequencies,parameter_bounds)
             sort!(population)
             elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
             min_fitness = elite.fitness
-            population[1] = redundacy_testing(population[1],measurements,frequencies,terminals,cutoff)
+            population[1] = redundacy_testing(population[1],measurements,frequencies,parameter_bounds,terminals,cutoff)
             generation += 1
         end
         replace_redundant_cpes!(population)
         population = removeduplicates(sort!(vcat(population,elite)))
         for i in 1:3
-            population[i] = removeredundancy(population[i],measurements,frequencies,terminals,cutoff)
+            population[i] = removeredundancy(population[i],measurements,frequencies,parameter_bounds,terminals,cutoff)
         end
         # extract the converged circuits.
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
@@ -216,10 +262,9 @@ end
  Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
  where each tuple has the circuit string as first value and the parameters as second value.
  - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
-
+ - `bounds`::Dict{Char, Vector}: Optional custom bounds for the circuit component parameter values.
 
 """
-
 function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing,convergence_threshold=5e-4)
     # Read the measurement file.
     meansurement_file = readdlm(filepath,',')
@@ -228,51 +273,51 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     imags = meansurement_file[:,2]
     frequencies = meansurement_file[:,3]
     measurements = reals + imags*im
+    parameter_bounds = Dict('R'=>[0,1.0e9],'C'=>[0,10],'L'=>[0,5],'P'=>[[0,0],[1.0e9,1]],'W'=>[0,1.0e9],'+'=>[0,0],'-'=>[0,0])
+    if typeof(bounds) == Dict{Char, Vector}
+        for key in keys(bounds)
+            parameter_bounds[key] = bounds[key]
+        end
+    end
     # Either initialize a new population, or work with a provided initial population.
     # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
-    # Either initialize a new population, or work with a provided initial population.
     if isnothing(initial_population)  
-        population = initializepopulation(population_size,head,terminals) #initializevariedpopulation(population_size,head)
+        population = initializepopulation(parameter_bounds,population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
         population = initial_population
     elseif typeof(initial_population) in [Vector{String},Vector{Tuple{String, Vector{Float64}}}]
         population = population_from_string(initial_population, head, population_size, terminals)
     end
     # Theoretical simplification of the initial population.
-    simplifypopulation!(population) 
-    # Calculate the fitness for each individual in the population and sort the population by fitness.
-    evaluate_fitness!(population,measurements,frequencies)
-    sort!(population)
-    generation = 0
-    # Keep track of the fittest individual circuit.
-    elite = minimum(population)
-    min_fitness = elite.fitness
-    # apply genetic operators and tournament selection to obtain new generations of circuits
-    # as long as none of the termination criteria are satisfied.
-    while (min_fitness > convergence_threshold) && (generation<=generations)
-        population = generate_offspring(population,terminals)
-        simplifypopulation!(population)
-        evaluate_fitness!(population,measurements,frequencies)
+        simplifypopulation!(population,terminals) 
+        evaluate_fitness!(population,measurements,frequencies,parameter_bounds)
         sort!(population)
-        elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+        generation = 0 
+        # Keep track of the fittest individual circuit.
+        elite = minimum(population)
         min_fitness = elite.fitness
-        population[1] = redundacy_testing(population[1],measurements,frequencies,terminals,cutoff)
-        generation += 1
-    end
-    # Convert CPEs with second parameter equal to 0 or 1 to capacitor or resistor.
-    replace_redundant_cpes!(population)
-    population = removeduplicates(sort!(vcat(population,elite)))
-    for i in 1:3
-        population[i] = removeredundancy(population[i],measurements,frequencies,terminals,cutoff)
-    end
-    # extract the converged circuits.
+        while (min_fitness > convergence_threshold) && (generation<=generations)
+            population = generate_offspring(population,terminals)
+            simplifypopulation!(population,terminals)
+            evaluate_fitness!(population,measurements,frequencies,parameter_bounds)
+            sort!(population)
+            elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
+            min_fitness = elite.fitness
+            population[1] = redundacy_testing(population[1],measurements,frequencies,parameter_bounds,terminals,cutoff)
+            generation += 1
+        end
+        replace_redundant_cpes!(population)
+        population = removeduplicates(sort!(vcat(population,elite)))
+        for i in 1:3
+            population[i] = removeredundancy(population[i],measurements,frequencies,parameter_bounds,terminals,cutoff)
+        end
+        # extract the converged circuits.
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
-    best_circuit = readablecircuit(population[1])
     # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
     if length(population) == 0
         println("Algorithm did not converge")
     else
+        best_circuit = readablecircuit(population[1])
         return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n]) 
     end
 end
-

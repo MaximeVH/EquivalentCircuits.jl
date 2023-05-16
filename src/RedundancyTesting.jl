@@ -22,12 +22,12 @@ function subtrees(tree)
     return trees
 end
 
-function redundacy_testing(circuit,measurements,frequencies,terminals = "RCLP",cutoffratio = 0.80)
+function redundacy_testing(circuit,measurements,frequencies,bounds,terminals = "RCLP",cutoffratio = 0.80)
     if count(isoperation,circuit.karva[1:3]) < 2
         return circuit
     end
     subcircs = subcircuits(circuit,terminals)
-    evaluate_fitness!(subcircs,measurements,frequencies)
+    evaluate_fitness!(subcircs,measurements,frequencies,bounds)
     candidate = minimum(subcircs)
     fitnessratio = circuit.fitness/candidate.fitness
     if fitnessratio >= cutoffratio
@@ -40,6 +40,12 @@ end
 function get_subcircuits(circuit,measurements,frequencies,terminals = "RCLP")
     subcircs = subcircuits(circuit,terminals)
     evaluate_fitness!(subcircs,measurements,frequencies) 
+    return subcircs
+end
+
+function get_subcircuits(circuit,measurements,frequencies,bounds,terminals = "RCLP")
+    subcircs = subcircuits(circuit,terminals)
+    evaluate_fitness!(subcircs,measurements,frequencies,bounds) 
     return subcircs
 end
 
@@ -57,6 +63,25 @@ function removeredundancy(circuit,measurements,frequencies,terminals = "RCPL",cu
             redundancy = false
         end
         subcircs = get_subcircuits(circuit,measurements,frequencies,terminals)
+        candidate = minimum(subcircs)
+    end
+    return circuit
+end
+
+function removeredundancy(circuit,measurements,frequencies,bounds,terminals = "RCPL",cutoff = 0.80)
+    if count(isoperation,circuit.karva[1:3]) == 1
+        return circuit
+    end
+    subcircs = get_subcircuits(circuit,measurements,frequencies,bounds,terminals)
+    candidate = minimum(subcircs)
+    redundancy = true
+    while redundancy && count(isoperation,candidate.karva[1:3])>1
+        if circuit.fitness/candidate.fitness > cutoff
+            circuit = candidate
+        else 
+            redundancy = false
+        end
+        subcircs = get_subcircuits(circuit,measurements,frequencies,bounds,terminals)
         candidate = minimum(subcircs)
     end
     return circuit
