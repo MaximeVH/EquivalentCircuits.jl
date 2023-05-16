@@ -66,3 +66,43 @@ function ReadGamry(fn_DTA::AbstractString)
     # ---
     return _frequ_data[idx_sorted], _Z_data[idx_sorted]
 end
+
+# Suppressing undesired warning messages
+
+macro suppress(block)
+    quote
+        if ccall(:jl_generating_output, Cint, ()) == 0
+            original_stdout = stdout
+            out_rd, out_wr = redirect_stdout()
+            out_reader = @async read(out_rd, String)
+
+            original_stderr = stderr
+            err_rd, err_wr = redirect_stderr()
+            err_reader = @async read(err_rd, String)
+
+            # approach adapted from https://github.com/JuliaLang/IJulia.jl/pull/667/files
+            logstate = Base.CoreLogging._global_logstate
+            logger = logstate.logger
+            if :stream in propertynames(logger) && logger.stream == original_stderr
+                new_logstate = Base.CoreLogging.LogState(typeof(logger)(err_wr, logger.min_level))
+                Core.eval(Base.CoreLogging, Expr(:(=), :(_global_logstate), new_logstate))
+            end
+        end
+
+        try
+            $(esc(block))
+        finally
+            if ccall(:jl_generating_output, Cint, ()) == 0
+                redirect_stdout(original_stdout)
+                close(out_wr)
+
+                redirect_stderr(original_stderr)
+                close(err_wr)
+
+                if :stream in propertynames(logger) && logger.stream == stderr
+                    Core.eval(Base.CoreLogging, Expr(:(=), :(_global_logstate), logstate))
+                end
+            end
+        end
+    end
+end
