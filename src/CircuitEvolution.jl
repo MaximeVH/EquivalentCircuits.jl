@@ -80,6 +80,7 @@ function circuitfitness(circuit,measurements,frequencies,bounds)
     tree = get_circuit_tree(circuit)
     circfunc,params,lower,upper,param_inds = func_and_params_for_optim(tree,bounds)
     objective = objectivefunction_noweight(circfunc,measurements,frequencies)
+    params = max.(min.(params,upper),lower.+10^-15)
     optparams,fitness = optimizeparameters(objective,params,lower,upper)
     optparams = max.(min.(optparams,upper),lower.+10^-15) #workaround of optim.jl's bug 
     return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds 
