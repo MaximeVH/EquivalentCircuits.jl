@@ -42,8 +42,8 @@ function circuitfunction(circuitstring)
             new_circuit = new_circuit*i
         end
     end
-    circuit_expression = Meta.parse(new_circuit)
-    return mk_function([:T,:f],[],circuit_expression)
+    circuit_expression = Meta.parse("((T,f)->"* new_circuit *")")
+    return @RuntimeGeneratedFunction(circuit_expression)
 end
 
 function circtuitfunction_fixed_params(circuitstring,param_indices,param_values)
@@ -74,9 +74,8 @@ function tree_to_function(tree_array)
             essential_info[parent1][2] = "((("*type1*")^-1)+("*type2*")^-1)^-1"
         end
     end
-    circuitExpression = Meta.parse(essential_info[1][2])
-return mk_function([:T,:f],[],circuitExpression)
-end
+    circuit_expression = Meta.parse("((T,f)->"* essential_info[1][2] *")")
+return @RuntimeGeneratedFunction(circuit_expression)
 
 karva_to_function(karva::String) = tree_to_function(karva_to_tree(karva))
 karva_to_function(circuit::Circuit) = karva_to_function(circuit.karva)

@@ -5,9 +5,10 @@ module EquivalentCircuits
     export loadpopulation, get_parameter_upper_bound
     export simulateimpedance_noiseless
     export Circuit, EquivalentCircuit
-    using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim
+    using Random, Combinatorics, RuntimeGeneratedFunctions, DelimitedFiles, Distributions, Optim
     using BlackBoxOptim
     import Base: isless, length
+    RuntimeGeneratedFunctions.init(@__MODULE__)
 
     include("Circuits.jl") 
     include("CircuitFunction.jl")
