@@ -76,6 +76,7 @@ function tree_to_function(tree_array)
     end
     circuit_expression = Meta.parse("((T,f)->"* essential_info[1][2] *")")
 return @RuntimeGeneratedFunction(circuit_expression)
+end
 
 karva_to_function(karva::String) = tree_to_function(karva_to_tree(karva))
 karva_to_function(circuit::Circuit) = karva_to_function(circuit.karva)
