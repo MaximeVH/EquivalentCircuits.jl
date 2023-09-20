@@ -47,8 +47,8 @@ function initialize_circuitlibrary(circuit,parameters=nothing,type = "N",source 
     if isnothing(parameters)
         parameters = circuitparameters(circuit)
     end
-    circuit_code,circuit_parameters = circuit_to_karva(circuit,parameters)
-    circuitlibrary = [Circuit(circuit_code,circuit_parameters,nothing)]
+    circuit_ = circuit_to_karva(circuit,parameters)
+    circuitlibrary = [circuit_]
     circuitmetadata = Array{Any}(undef,1,4)
     circuitmetadata[1:4] = [circuit,parameters,type,source]
     savepopulation("Circuitlibrary.csv",circuitlibrary)
@@ -68,8 +68,8 @@ function add_to_circuitlibrary(circuit,parameters=nothing,type = "N",source = "n
         parameters = circuitparameters(circuit)
     end
     #convert the circuit to its basic encoding and parameter values.
-    circuit_code,circuit_parameters = circuit_to_karva(circuit,parameters)
-    circuitobject = Circuit(circuit_code,circuit_parameters,nothing)
+    circuitobject = circuit_to_karva(circuit,parameters)
+    # circuitobject = Circuit(circuit_code,circuit_parameters,nothing)
     #elongate with random terminals until required length, dictated by the head length.
     #load the circuitlibrary and circuitlibrary metadata files.
     circuitlibrary = loadpopulation("CircuitLibrary.csv")
@@ -89,8 +89,8 @@ function add_to_circuitlibrary_limitedparams(circuit,limitedparams,type = "N",so
     @assert isfile("CircuitLibrary.csv") "A circuitlibrary has not yet been initialized in the current directory."
     parameters = circuitparameters(circuit,limitedparams)
     #convert the circuit to its basic encoding and parameter values.
-    circuit_code,circuit_parameters = circuit_to_karva(circuit,parameters)
-    circuitobject = Circuit(circuit_code,circuit_parameters,nothing)
+    circuitobject = circuit_to_karva(circuit,parameters)
+    # circuitobject = Circuit(circuit_code,circuit_parameters,nothing)
     #elongate with random terminals until required length, dictated by the head length.
     #load the circuitlibrary and circuitlibrary metadata files.
     circuitlibrary = loadpopulation("CircuitLibrary.csv")
