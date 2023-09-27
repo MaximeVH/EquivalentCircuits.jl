@@ -361,7 +361,7 @@ function genetic_algorithm(circuit,circuit_parameters,pop_size = 50) #Maybe try 
     unchanged_generation_counter = 0
     while fitnesses[1] != best_possible_fitness && !(unchanged_generation_counter >= 20 && max_fitness < 10) 
         Candidate_index_sets,fitnesses = next_generation(Candidate_index_sets,fitnesses,circuit_bare,karva_params,operation_indexes,terminal_indexes,target_impedance,0.05)
-        println(max_fitness)
+        @info "max fitness: $(max_fitness)"
         if fitnesses[1] >= max_fitness
             unchanged_generation_counter += 1
         else

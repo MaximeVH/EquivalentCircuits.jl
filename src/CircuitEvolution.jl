@@ -41,9 +41,7 @@ function initializecircuit(bounds,head=8,terminals="RCLP")
     return Circuit(karva,parameters,nothing)
 end
 
-# function initializepopulation(size=20,head=8,terminals="RCLP")
-#     return [initializecircuit(head,terminals) for i in 1:size]
-# end
+
 
 function initializepopulation(bounds,size=20,head=8,terminals="RCLP")
     return [initializecircuit(bounds,head,terminals) for i in 1:size]
@@ -235,7 +233,7 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
     # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
     if length(population) == 0
-        println("Algorithm did not converge")
+        @info "Algorithm did not converge"
     else
         best_circuit = readablecircuit(population[1])
         return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n]) 
@@ -316,7 +314,7 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     population = filter(p -> p.fitness ≤ convergence_threshold, population)
     # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
     if length(population) == 0
-        println("Algorithm did not converge")
+        @info "Algorithm did not converge"
     else
         best_circuit = readablecircuit(population[1])
         return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n]) 
