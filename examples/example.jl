@@ -27,4 +27,4 @@ p = parameteroptimisation("[[C1,R2]-R3,P4]", Z, freq)
 If you want to generate multiple candidate circuits, you can use the `circuit_evolution_batch`
 function. This function is parallelised on all available cores.
 """
-circuits = circuit_evolution_batch(Z, freq; iters=6);
+circuits = circuit_evolution_batch(Z, freq; generations=30, population_size=100, iters=6);
