@@ -372,7 +372,7 @@ function circuit_evolution_batch(
     iters,
 )
     # Set up workers
-    _workers = addprocs(numprocs)
+    _workers = addprocs(min(numprocs, iters))
     import_module_on_workers(_workers)
 
     # Run the circuit evolution in parallel on all workers
