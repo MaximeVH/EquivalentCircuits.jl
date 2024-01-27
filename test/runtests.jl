@@ -1,7 +1,7 @@
-using EquivalentCircuits, DelimitedFiles, Test 
+using EquivalentCircuits, DelimitedFiles, Test
 using EquivalentCircuits: subcircuits, flatten, readablecircuit, simplifycircuit!, replace_redundant_cpes!
 using EquivalentCircuits: isterminal, isoperation, generatekarva, karva_parameters,karva_to_tree, Circuit
-using EquivalentCircuits: tree_to_function, circuitfunction 
+using EquivalentCircuits: tree_to_function, circuitfunction
 
 measurements = [5919.90 - 15.79im, 5919.58 - 32.68im, 5918.18 - 67.58im, 5912.24 - 139.49im,
  5887.12 - 285.74im, 5785.04 - 566.88im, 5428.94 - 997.19im, 4640.21 - 1257.83im, 3871.84 - 978.97im,
@@ -64,14 +64,21 @@ tree = karva_to_tree(encoding,parameters);
     @test 0<P2_2<1
     @test 0<R3<1.0e9
     # Subtrees length checking. There ought to be as many circuits as coding terminal elements.
-    @test length(subcircuits(example_circuit)) == 5 
-  
-    # Intial parameters 
-    
+    @test length(subcircuits(example_circuit)) == 5
+
+    # Intial parameters
+
     # I had to remove this unit test, as, unfortunately the provision of initial parameters does not reproducibly reduce the runtime of the parameteroptimisation function.
 
     # bad_guess = @elapsed begin optparams = parameteroptimisation("[C1,P2]-R3",measurements,frequencies) end
     # x_0 = collect(values(optparams))
     # perfect_guess = @elapsed begin optparams_x0 = parameteroptimisation("[C1,P2]-R3",measurements,frequencies,x0=x_0) end
     # @test perfect_guess <= bad_guess
+
+    # Check the circuit_evolution_batch function.
+    circuits = circuit_evolution_batch(measurements,frequencies; generations=30, population_size=100, iters=2);
+    @test length(circuits) == 2
+    for circuit in circuits
+        @test typeof(circuit) in [EquivalentCircuit, Nothing]
+    end
 end
