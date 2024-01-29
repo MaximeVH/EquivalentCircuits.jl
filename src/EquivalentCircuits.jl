@@ -1,6 +1,6 @@
 module EquivalentCircuits
 
-    export circuit_evolution, circuit_search
+    export circuit_evolution, circuit_search, circuit_evolution_batch
     export parameteroptimisation, circuitfunction
     export loadpopulation, get_parameter_upper_bound
     export simulateimpedance_noiseless
@@ -9,7 +9,7 @@ module EquivalentCircuits
     using BlackBoxOptim
     import Base: isless, length
 
-    include("Circuits.jl") 
+    include("Circuits.jl")
     include("CircuitFunction.jl")
     include("EvolutionOperators.jl")
     include("ObjectiveFunction.jl")

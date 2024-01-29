@@ -1,3 +1,5 @@
+using Distributed
+
 # circuitstring conversion to and from impedance.py
 
 function impy_to_ec(circuitstring::String)
@@ -49,10 +51,10 @@ function ReadGamry(fn_DTA::AbstractString)
     else
         # --- original: Pt          Time	Freq	 Zreal	   Zimag	 Zsig	      Zmod	   Zphz	    Idc	    Vdc	    IERange
         s_header = ["", "Point",    "Time", "Frequ", "Z_real", "Z_imag", "Amplitude", "Z_mod", "Z_phz", "I_dc", "V_dc", "IE_range"]
-        filecontent = CSV.File(fn_data; 
+        filecontent = CSV.File(fn_data;
             header = s_header,
-            skipto = idx_header_line, 
-            decimal = char_dicimal_delim, 
+            skipto = idx_header_line,
+            decimal = char_dicimal_delim,
             delim = "\t");
     end
     # --- check column missmatch:
@@ -104,5 +106,13 @@ macro suppress(block)
                 end
             end
         end
+    end
+end
+
+
+# https://github.com/MilesCranmer/SymbolicRegression.jl/blob/master/src/Configure.jl
+function import_module_on_workers(procs)
+    @everywhere procs begin
+        Base.MainInclude.eval(:(using EquivalentCircuits))
     end
 end

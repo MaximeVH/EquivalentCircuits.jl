@@ -1,6 +1,8 @@
+using Hwloc
+
 """
-EquivalentCircuit(circuitstring::String, Parameters::NamedTuple)   
-   
+EquivalentCircuit(circuitstring::String, Parameters::NamedTuple)
+
 A structure used as the output of the evolutionary algorithm. It's fields are 'circuitstring', which is the string representation of a circuit (e.g. "R1-[C2,R3]-P4")
 and 'Parameters', a NamedTuple with the circuit's components and their corresponding parameter values.
 
@@ -30,13 +32,13 @@ function parametertuple(circuit,parameters)
 end
 
 # function initializecircuit(head=8,terminals="RCLP")
-#     karva = generatekarva(head,terminals) 
+#     karva = generatekarva(head,terminals)
 #     parameters = karva_parameters(karva)
 #     return Circuit(karva,parameters,nothing)
 # end
 
 function initializecircuit(bounds,head=8,terminals="RCLP")
-    karva = generatekarva(head,terminals) 
+    karva = generatekarva(head,terminals)
     parameters = karva_parameters_(karva,bounds)
     return Circuit(karva,parameters,nothing)
 end
@@ -80,8 +82,8 @@ function circuitfitness(circuit,measurements,frequencies,bounds)
     objective = objectivefunction_noweight(circfunc,measurements,frequencies)
     params = max.(min.(params,upper),lower.+10^-15)
     optparams,fitness = optimizeparameters(objective,params,lower,upper)
-    optparams = max.(min.(optparams,upper),lower.+10^-15) #workaround of optim.jl's bug 
-    return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds 
+    optparams = max.(min.(optparams,upper),lower.+10^-15) #workaround of optim.jl's bug
+    return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds
 end
 
 function circuitfitness(circuit,measurements,frequencies)
@@ -90,7 +92,7 @@ function circuitfitness(circuit,measurements,frequencies)
     objective = objectivefunction_noweight(circfunc,measurements,frequencies)
     optparams,fitness = optimizeparameters(objective,params,upper)
     optparams = max.(min.(optparams,upper),0) #workaround of optim.jl's bug
-    return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds 
+    return deflatten_parameters(optparams,tree,param_inds), fitness, param_inds
 end
 
 function generate_offspring(population,terminals="RCLP")
@@ -121,19 +123,19 @@ end
 function evaluate_fitness!(population,measurements,frequencies,bounds)
     params = []
     param_inds = []
-    for circuit in population 
+    for circuit in population
         params,circuit.fitness,param_inds = @suppress circuitfitness(circuit,measurements,frequencies,bounds)
         circuit.parameters[param_inds] = params
-    end 
+    end
 end
 
 function evaluate_fitness!(population,measurements,frequencies)
     params = []
     param_inds = []
-    for circuit in population 
+    for circuit in population
         params,circuit.fitness,param_inds = circuitfitness(circuit,measurements,frequencies)
         circuit.parameters[param_inds] = params
-    end 
+    end
 end
 
 function population_from_string(circuitstring_list, head=8, size=30, terminals="RCLP")
@@ -156,7 +158,7 @@ end
 """
 circuit_evolution(measurements::Array{Complex{Float64},1},frequencies::Array{Float64,1}; <keyword arguments>)
 
-Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements. 
+Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements.
 
 The inputs are a circuit (e.g. "R1-[C2,R3]-P4") an array of complex-valued impedance measurements and their corresponding
 frequencies. The output is an EquivalentCircuit object containing a field circuitstring, which is a string denoting the identified circuit
@@ -169,7 +171,7 @@ and a field Parameters, which is a NamedTuple of the circuit's components with t
 - `head::Integer=8`: a hyperparameter than controls the maximum considered complexity of the circuits.
 - `cutoff::Float64=0.8`: a hyperparameter that controls the circuit complexity by removing redundant components.
 - `initial_population::Array{Circuit,1}=nothing`:the option to provide an initial population of circuits
-(obtained by using the loadpopulation function) with which the algorithm starts. 
+(obtained by using the loadpopulation function) with which the algorithm starts.
  Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
  where each tuple has the circuit string as first value and the parameters as second value.
  - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
@@ -181,7 +183,7 @@ julia> using EquivalentCircuits, Random
 
 julia> Random.seed!(25);
 
-julia> measurements = [5919.9 - 15.7, 5918.1 - 67.5im, 5887.1 - 285.7im, 5428.9 - 997.1im, 3871.8 - 978.9im, 
+julia> measurements = [5919.9 - 15.7, 5918.1 - 67.5im, 5887.1 - 285.7im, 5428.9 - 997.1im, 3871.8 - 978.9im,
 3442.9 - 315.4im, 3405.5 - 242.5im, 3249.6 - 742.0im, 1779.4 - 1698.9im,  208.2 - 777.6im, 65.9 - 392.5im];
 
 julia> frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 11288.38, 48329.30, 100000.00];
@@ -199,7 +201,7 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
     end
     # Either initialize a new population, or work with a provided initial population.
     # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
-    if isnothing(initial_population)  
+    if isnothing(initial_population)
         population = initializepopulation(parameter_bounds,population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
         population = initial_population
@@ -207,10 +209,10 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
         population = population_from_string(initial_population, head, population_size, terminals)
     end
     # Theoretical simplification of the initial population.
-        simplifypopulation!(population,terminals) 
+        simplifypopulation!(population,terminals)
         evaluate_fitness!(population,measurements,frequencies,parameter_bounds)
         sort!(population)
-        generation = 0 
+        generation = 0
         # Keep track of the fittest individual circuit.
         elite = minimum(population)
         min_fitness = elite.fitness
@@ -236,16 +238,16 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
         @info "Algorithm did not converge"
     else
         best_circuit = readablecircuit(population[1])
-        return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n]) 
+        return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n])
     end
 end
 
 """
     circuit_evolution(filepath::String; <keyword arguments>)
 
- Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements. 
+ Identify an equivalent electrical circuit that fits a given set of electrochemical impedance spectroscopy measurements.
 
- The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath to a CSV file containing the three following columns: 
+ The inputs are a circuit (e.g. "R1-[C2,R3]-P4") and a filepath to a CSV file containing the three following columns:
  the real part of the impedance, the imaginary part of the impedance, and the frequencies corresponding to the measurements.
  The output is NamedTuple of the circuit's components with their corresponding parameter values.
 
@@ -257,7 +259,7 @@ end
 - `head::Integer=8`: a hyperparameter than controls the maximum considered complexity of the circuits.
 - `cutoff::Float64=0.8`: a hyperparameter that controls the circuit complexity by removing redundant components.
 - `initial_population::Array{Circuit,1}=nothing`:the option to provide an initial population of circuits
-(obtained by using the loadpopulation function) with which the algorithm starts. 
+(obtained by using the loadpopulation function) with which the algorithm starts.
  Alternatively, users can provide a custom list of circuits which can either be a list of one or more circuit strings or a list of tuples
  where each tuple has the circuit string as first value and the parameters as second value.
  - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
@@ -280,7 +282,7 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     end
     # Either initialize a new population, or work with a provided initial population.
     # @assert typeof(initial_population) in [nothing,Vector{Circuit},Vector{String},Vector{Tuple{String, Vector{Float64}}}] "The initial population must be a list."
-    if isnothing(initial_population)  
+    if isnothing(initial_population)
         population = initializepopulation(parameter_bounds,population_size,head,terminals) #initializevariedpopulation(population_size,head)
     elseif typeof(initial_population) == Vector{Circuit}
         population = initial_population
@@ -288,10 +290,10 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
         population = population_from_string(initial_population, head, population_size, terminals)
     end
     # Theoretical simplification of the initial population.
-        simplifypopulation!(population,terminals) 
+        simplifypopulation!(population,terminals)
         evaluate_fitness!(population,measurements,frequencies,parameter_bounds)
         sort!(population)
-        generation = 0 
+        generation = 0
         # Keep track of the fittest individual circuit.
         elite = minimum(population)
         min_fitness = elite.fitness
@@ -317,6 +319,83 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
         @info "Algorithm did not converge"
     else
         best_circuit = readablecircuit(population[1])
-        return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n]) 
+        return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n])
     end
+end
+
+
+"""
+    circuit_evolution_batch(args...; kwargs...)
+
+Similar to the `circuit_evolution` function, but to generate multiple candidate circuits.
+
+# Arguments
+
+- `measurements::Array{Complex{Float64},1}`: Array of complex-valued impedance measurements.
+- `frequencies::Array{Float64,1}`: Frequencies corresponding to the measurements.
+
+# Keywords
+
+- `generations::Integer=10`: Maximum number of iterations of the evolutionary algorithm.
+- `population_size::Integer=30`: Number of individuals in the population during each iteration.
+- `terminals::String="RCLP"`: Allowed components to be included in the circuit.
+- `head::Integer=8`: Controls the maximum considered complexity of the circuits.
+- `cutoff::Float64=0.8`: Controls the circuit complexity by removing redundant components.
+- `initial_population::Array{Circuit,1}=nothing`: The option to provide an initial
+    population of circuits (obtained by using the loadpopulation function) with which the
+    algorithm starts. Alternatively, users can provide a custom list of circuits which can
+    either be a list of one or more circuit strings or a list of tuples where each tuple
+    has the circuit string as first value and the parameters as second value.
+- `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification.
+    Increase to reduce strictness, e.g., in case of noisy measurements.
+- `bounds`::Dict{Char, Vector}: Upper/lower bounds for the circuit component parameter values.
+- `numprocs::Integer=num_physical_cores()`: Number of processes to use for parallelisation.
+- `iters`: Number of candidate circuits to generate.
+
+# Returns
+
+- `results::Vector{EquivalentCircuit}`: A vector of EquivalentCircuit objects.
+
+"""
+function circuit_evolution_batch(
+    measurements,
+    frequencies;
+    generations::Real=10,
+    population_size=30,
+    terminals="RCLP",
+    head=8,
+    cutoff=0.8,
+    initial_population=nothing,
+    convergence_threshold=5e-4,
+    bounds=nothing,
+    numprocs=num_physical_cores(),
+    iters,
+)
+    # Set up workers
+    _workers = addprocs(min(numprocs, iters))
+    import_module_on_workers(_workers)
+
+    # Run the circuit evolution in parallel on all workers
+    @info "Starting circuit evolution on $(length(_workers)) workers"
+    results = pmap(
+        _ -> circuit_evolution(
+            measurements,
+            frequencies;
+            generations=generations,
+            population_size=population_size,
+            terminals=terminals,
+            head=head,
+            cutoff=cutoff,
+            initial_population=initial_population,
+            convergence_threshold=convergence_threshold,
+            bounds=bounds,
+        ),
+        WorkerPool(_workers),
+        1:iters,
+    )
+
+    # Remove workers
+    rmprocs(_workers)
+
+    return results
 end
