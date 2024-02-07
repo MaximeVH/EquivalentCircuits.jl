@@ -7,6 +7,7 @@ module EquivalentCircuits
     export Circuit, EquivalentCircuit
     using Random, Combinatorics, GeneralizedGenerated, DelimitedFiles, Distributions, Optim
     using BlackBoxOptim
+    using Hwloc
     import Base: isless, length
 
     include("Circuits.jl")
@@ -20,6 +21,7 @@ module EquivalentCircuits
     include("RedundancyTesting.jl")
     include("Miscellaneous.jl")
     include("CircuitEvolution.jl")
+    include("MAP_elites.jl")
 
 
 end
