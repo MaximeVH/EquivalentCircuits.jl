@@ -282,7 +282,7 @@ function circuit_search(measurements,frequencies,domain;terminals="RCLPW",fitnes
     circuit = circuit[fitness_inds]
     dois = dois[fitness_inds]
     if isempty(circuit)
-        println("No available circuits adequately fit the given measurement data.")
+        @info "No available circuits adequately fit the given measurement data."
     else
         sp = sortperm(fitnesses)
         return hcat(circuit[sp],dois[sp])
