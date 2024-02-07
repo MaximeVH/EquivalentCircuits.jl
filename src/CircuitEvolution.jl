@@ -1,5 +1,3 @@
-using Hwloc
-
 """
 EquivalentCircuit(circuitstring::String, Parameters::NamedTuple)
 
