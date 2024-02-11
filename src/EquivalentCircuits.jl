@@ -21,7 +21,6 @@ module EquivalentCircuits
     include("RedundancyTesting.jl")
     include("Miscellaneous.jl")
     include("CircuitEvolution.jl")
-    include("MAP_elites.jl")
-
+    # include("MAP_elites.jl")
 
 end
