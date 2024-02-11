@@ -369,10 +369,13 @@ function circuit_evolution_batch(
     bounds=nothing,
     numprocs=num_physical_cores(),
     iters,
+    quiet=false,
 )
     # Set up workers
     _workers = addprocs(min(numprocs, iters))
     import_module_on_workers(_workers)
+    # Optionally disable logging (useful when calling from Python)
+    quiet && disable_logging_distributed(Logging.Warn, _workers)
 
     # Run the circuit evolution in parallel on all workers
     @info "Starting circuit evolution on $(length(_workers)) workers"
