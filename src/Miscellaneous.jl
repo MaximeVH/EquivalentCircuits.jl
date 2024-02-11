@@ -1,3 +1,4 @@
+using Logging
 using Distributed
 
 # circuitstring conversion to and from impedance.py
@@ -114,5 +115,13 @@ end
 function import_module_on_workers(procs)
     @everywhere procs begin
         Base.MainInclude.eval(:(using EquivalentCircuits))
+    end
+end
+
+
+function disable_logging_distributed(level::Logging.LogLevel, procs::Vector{Int})
+    @everywhere procs begin
+        Base.MainInclude.eval(:(using Logging))
+        disable_logging($level)  # Use the variable level here
     end
 end
