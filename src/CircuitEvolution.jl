@@ -377,6 +377,10 @@ function circuit_evolution_batch(
     # Optionally disable logging (useful when calling from Python)
     quiet && disable_logging_distributed(Logging.Warn, _workers)
 
+    # Re-convert inputs to arrays until JuliaPy/PythonCall.jl/issues/454 is resolved
+    measurements = Array(measurements)
+    frequencies = Array(frequencies)
+
     # Run the circuit evolution in parallel on all workers
     @info "Starting circuit evolution on $(length(_workers)) workers"
     results = pmap(
