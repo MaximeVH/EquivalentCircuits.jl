@@ -376,6 +376,7 @@ function circuit_evolution_batch(
     import_module_on_workers(_workers)
     # Optionally disable logging (useful when calling from Python)
     quiet && disable_logging_distributed(Logging.Warn, _workers)
+    quiet && disable_logging(Logging.Warn)
 
     # Re-convert inputs to arrays until JuliaPy/PythonCall.jl/issues/454 is resolved
     measurements = Array(measurements)
