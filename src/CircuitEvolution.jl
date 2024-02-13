@@ -190,7 +190,8 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 [R1,C2]-[C3,R4]-R5
 ```
 """
-function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing)
+function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing,quiet=false)
+    quiet && disable_logging(Logging.Warn)
     parameter_bounds = Dict('R'=>[0,1.0e9],'C'=>[0,10],'L'=>[0,5],'P'=>[[0,0],[1.0e9,1]],'W'=>[0,1.0e9],'+'=>[0,0],'-'=>[0,0])
     if typeof(bounds) == Dict{Char, Vector}
         for key in keys(bounds)
@@ -368,10 +369,18 @@ function circuit_evolution_batch(
     bounds=nothing,
     numprocs=num_physical_cores(),
     iters,
+    quiet=false,
 )
     # Set up workers
     _workers = addprocs(min(numprocs, iters))
     import_module_on_workers(_workers)
+    # Optionally disable logging (useful when calling from Python)
+    quiet && disable_logging_distributed(Logging.Warn, _workers)
+    quiet && disable_logging(Logging.Warn)
+
+    # Re-convert inputs to arrays until JuliaPy/PythonCall.jl/issues/454 is resolved
+    measurements = Array(measurements)
+    frequencies = Array(frequencies)
 
     # Run the circuit evolution in parallel on all workers
     @info "Starting circuit evolution on $(length(_workers)) workers"
