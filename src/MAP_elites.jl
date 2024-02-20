@@ -347,7 +347,7 @@ function circuit_map_elites_continue_R(iterations,P,χ,measurements,frequencies,
         end
     end
     iter = 0
-    population_size = length(population_from_archive(P,X))
+    population_size = length(population_from_archive(P,χ))
     while (iter ≤ iterations) 
         iter += 1
         for e in 1:population_size
