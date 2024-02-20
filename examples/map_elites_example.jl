@@ -8,7 +8,7 @@ frequencies = [0.10, 0.43, 1.83, 7.85, 33.60, 143.84, 615.85,  2636.65, 11288.38
 # P is the matrix that keeps track of the circuit archive's fitness for different circuit complexities.
 # X is the archive itself, where position (i,j), if occupied, is the circuit containing i integer components and j fractional components.
 # I is the number of iterations (usually low) required to find a circuit under the convergence threshold.
-P,X,I = circuit_map_elites_R(measurements,frequencies,population_size=40,iterations=60)
+@time P,X,I = circuit_map_elites_R(measurements,frequencies,population_size=40,iterations=60)
 
 # Two functions to visualize the found circuits according to their complexity and fitness
 annotated_archive(P,X)
@@ -23,3 +23,16 @@ Archive_nyquist(measurements,frequencies,P,X)
 # Continue searching for more circuits over N generations (recommended).
 N = 50
 @time P,X = circuit_map_elites_continue_R(N,P,X,measurements,frequencies)
+
+# Get the resulting population of circuit instances as an array.
+population_ = population_from_archive(P,X)
+
+# Adjusted version of MAP-Elites with multiple solutions (pe argument) at each feature description. 
+# This version takes longer but provides more solution candidates.
+@time P3,X3,I3 = circuit_map_elites_R_m(measurements,frequencies,population_size=40,iterations=60,pe=3)
+@time P3,X3 = circuit_map_elites_continue_R_m(50,P3,X3,measurements,frequencies)
+
+# The same plotting functions are supported for the resulting outputs.
+annotated_archive(P3,X3)
+plot_MAP_archive(P3)
+Archive_nyquist(measurements,frequencies,P3,X3)
