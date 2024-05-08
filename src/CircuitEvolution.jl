@@ -29,6 +29,10 @@ function parametertuple(circuit,parameters)
     return NamedTuple{name_symbols}(Tuple(parameters))
 end
 
+function Circuit2EquivalentCircuit(circuit)
+    circuitstring, parameters = tree_to_circuit(karva_to_tree(circuit.karva,circuit.parameters))
+    return EquivalentCircuit(circuitstring,parametertuple(circuitstring,flatten(parameters)))
+end
 # function initializecircuit(head=8,terminals="RCLP")
 #     karva = generatekarva(head,terminals)
 #     parameters = karva_parameters(karva)
