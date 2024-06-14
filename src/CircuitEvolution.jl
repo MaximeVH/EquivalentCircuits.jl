@@ -240,9 +240,9 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
     if length(population) == 0
         @info "Algorithm did not converge"
     else
-        best_circuit = readablecircuit(population[1])
-        return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n])
-    end
+           # best_circuit = readablecircuit(population[1])
+           return  Circuit2EquivalentCircuit(population[1])
+        end
 end
 
 """
@@ -321,9 +321,9 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
     if length(population) == 0
         @info "Algorithm did not converge"
     else
-        best_circuit = readablecircuit(population[1])
-        return EquivalentCircuit(best_circuit,parameteroptimisation(best_circuit,measurements,frequencies)) #readablecircuit.(population[1:top_n])
-    end
+           # best_circuit = readablecircuit(population[1])
+           return  Circuit2EquivalentCircuit(population[1])
+        end
 end
 
 
