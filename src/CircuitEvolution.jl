@@ -194,7 +194,7 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 [R1,C2]-[C3,R4]-R5
 ```
 """
-function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing,quiet=false)
+function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing,quiet=false,verbose=false)
     quiet && disable_logging(Logging.Warn)
     parameter_bounds = Dict('R'=>[0,1.0e9],'C'=>[0,10],'L'=>[0,5],'P'=>[[0,0],[1.0e9,1]],'W'=>[0,1.0e9],'+'=>[0,0],'-'=>[0,0])
     if typeof(bounds) == Dict{Char, Vector}
@@ -227,6 +227,9 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
             elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
             min_fitness = elite.fitness
             population[1] = redundacy_testing(population[1],measurements,frequencies,parameter_bounds,terminals,cutoff)
+            if verbose
+                @info "Generation: $generation / $generations, Best fitness: $(elite.fitness), fitness threshold: $convergence_threshold"
+            end
             generation += 1
         end
         replace_redundant_cpes!(population)
@@ -260,6 +263,7 @@ end
 - `population_size::Integer=30`: the number of individuals in the population during each iteration.
 - `terminals::String="RCLP"`: the circuit components that are to be included in the circuit identification.
 - `head::Integer=8`: a hyperparameter than controls the maximum considered complexity of the circuits.
+- `verbose::Bool=false`: optional verbose output to track the progress of the algorithm.
 - `cutoff::Float64=0.8`: a hyperparameter that controls the circuit complexity by removing redundant components.
 - `initial_population::Array{Circuit,1}=nothing`:the option to provide an initial population of circuits
 (obtained by using the loadpopulation function) with which the algorithm starts.
@@ -269,7 +273,7 @@ end
  - `bounds`::Dict{Char, Vector}: Optional custom bounds for the circuit component parameter values.
 
 """
-function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing,convergence_threshold=5e-4)
+function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing,convergence_threshold=5e-4,verbose=false)
     # Read the measurement file.
     meansurement_file = readdlm(filepath,',')
     # convert the measurement data into usable format.
@@ -308,6 +312,9 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
             elite = minimum(population).fitness < elite.fitness ? minimum(population) : elite
             min_fitness = elite.fitness
             population[1] = redundacy_testing(population[1],measurements,frequencies,parameter_bounds,terminals,cutoff)
+            if verbose
+                @info "Generation: $generation / $generations, Best fitness: $(elite.fitness), fitness threshold: $convergence_threshold"
+            end
             generation += 1
         end
         replace_redundant_cpes!(population)
