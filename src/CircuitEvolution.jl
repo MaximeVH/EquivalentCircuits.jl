@@ -232,7 +232,7 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
             end
             generation += 1
         end
-        replace_redundant_cpes!(population)
+        replace_redundant_cpes!(population,terminals)
         population = removeduplicates(sort!(vcat(population,elite)))
         for i in 1:3
             population[i] = removeredundancy(population[i],measurements,frequencies,parameter_bounds,terminals,cutoff)
@@ -317,7 +317,7 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
             end
             generation += 1
         end
-        replace_redundant_cpes!(population)
+        replace_redundant_cpes!(population,terminals)
         population = removeduplicates(sort!(vcat(population,elite)))
         for i in 1:3
             population[i] = removeredundancy(population[i],measurements,frequencies,parameter_bounds,terminals,cutoff)

@@ -84,14 +84,14 @@ function simplifycircuit!(circuit::Circuit,terminals="RCPL")
     end
 end
 
-function replace_redundant_cpes!(circuit::Circuit) 
+function replace_redundant_cpes!(circuit::Circuit,terminals::String) 
     cpe_positions = findall(x->x=='P',circuit.karva)
     mutable_karva = split(circuit.karva,"")
     for position in cpe_positions
-        if circuit.parameters[position][2] > 0.99 && (1/(circuit.parameters[position][1]) < 10) 
+        if circuit.parameters[position][2] > 0.99 && (1/(circuit.parameters[position][1]) < 10) && occursin("C",terminals)
             mutable_karva[position] = "C"
             circuit.parameters[position] = 1/(circuit.parameters[position][1])
-        elseif circuit.parameters[position][2] < 0.01 
+        elseif circuit.parameters[position][2] < 0.01 && occursin("R",terminals)
             mutable_karva[position] = "R"
             circuit.parameters[position] = circuit.parameters[position][1]
         end
@@ -101,9 +101,9 @@ end
 
 #Extra simplification to be included: if the second CPE parameter is sufficiently close to 0.5: it can be replaced by a Warburg element.
 
-function replace_redundant_cpes!(population::Array{Circuit,1})
+function replace_redundant_cpes!(population::Array{Circuit,1},terminals::String)
     for circuit in population
-        replace_redundant_cpes!(circuit)
+        replace_redundant_cpes!(circuit,terminals)
     end
 end
 
