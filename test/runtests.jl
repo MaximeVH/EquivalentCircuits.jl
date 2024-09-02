@@ -51,7 +51,7 @@ tree = karva_to_tree(encoding,parameters);
     # Check the output of circuit simulation. this test will be remade with modified CPE expression.
     # @test example_function(exam_params,100) == 1789.4845259396134 - 10.86703970004648im
     # Replace redundant CPEs and simplify
-    replace_redundant_cpes!(example_circuit_redundant_CPE) # converts the redundant CPE to an equivalent capacitor.
+    replace_redundant_cpes!(example_circuit_redundant_CPE,"RCLP") # converts the redundant CPE to an equivalent capacitor.
     simplifycircuit!(example_circuit_redundant_CPE) # simplifies all parralelly or serially connected similar components.
     # Circuit simplification should lead to a single resistor element R3.
     @test readablecircuit(example_circuit_redundant_CPE) == "C1-R2"
