@@ -12,6 +12,28 @@ end
 
 Base.display(circuit::EquivalentCircuit) = println(circuit.circuitstring)
 
+"""
+results(population::Vector{Circuit},population_fitnesses::Vector{Float64},best_circuit::EquivalentCircuit,best_fitness::Float64,n_converged::Int)
+
+A structure used as the output of the evolutionary algorithm. It's fields are 'population', a vector of circuits which is the complete final population of the algorithm run,
+'population_fitnesses', the corresponding fitnesses, best_circuit, an EquivalentCircuit object of the best circuit, best_fitness, its corresponding fitness value, and
+n_converged, the number of returned circuits with a fitness value within the convergence threshold, and generations, which is the number of iterations.
+
+"""
+
+struct results
+    population::Vector{Circuit}
+    population_fitnesses::Vector{Float64}
+    best_circuit::EquivalentCircuit
+    best_fitness::Float64
+    n_converged::Int
+    generations::Int
+end
+
+Base.display(res::results) = println("Best circuit: $(res.best_circuit)\nBest fitness: $(res.best_fitness)\nNumber of converged circuits: $(res.n_converged)\nNumber of generations: $(res.generations)")
+
+
+
 function parametertuple(circuit,parameters)
     elements = foldl(replace,["["=>"","]"=>"","-"=>"",","=>""],init = denumber_circuit(circuit))
     name_strings = []
@@ -194,7 +216,7 @@ julia> circuit_evolution(measurements, frequencies , generations= 15, terminals 
 [R1,C2]-[C3,R4]-R5
 ```
 """
-function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing,quiet=false,verbose=false)
+function circuit_evolution(measurements,frequencies;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population=nothing,convergence_threshold=5e-4,bounds=nothing,quiet=false,verbose=false,output="circuit")
     quiet && disable_logging(Logging.Warn)
     parameter_bounds = Dict('R'=>[0,1.0e9],'C'=>[0,10],'L'=>[0,5],'P'=>[[0,0],[1.0e9,1]],'W'=>[0,1.0e9],'+'=>[0,0],'-'=>[0,0])
     if typeof(bounds) == Dict{Char, Vector}
@@ -237,16 +259,21 @@ function circuit_evolution(measurements,frequencies;generations::Real=10,populat
         for i in 1:3
             population[i] = removeredundancy(population[i],measurements,frequencies,parameter_bounds,terminals,cutoff)
         end
-        # extract the converged circuits.
-    population = filter(p -> p.fitness ≤ convergence_threshold, population)
-    # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
-    if length(population) == 0
-        @info "Algorithm did not converge"
-    else
-           # best_circuit = readablecircuit(population[1])
-           return  Circuit2EquivalentCircuit(population[1])
+        if output=="circuit"
+            # extract the converged circuits.
+            population = filter(p -> p.fitness ≤ convergence_threshold, population)
+            # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
+            if length(population) == 0
+                @info "Algorithm did not converge"
+            else
+                # best_circuit = readablecircuit(population[1])
+                return  Circuit2EquivalentCircuit(population[1])
+            end
+        elseif output=="results"
+            n_converged = count(p -> p.fitness ≤ convergence_threshold, population)
+            return results(population, [c.fitness for c in population], Circuit2EquivalentCircuit(population[1]), population[1].fitness, n_converged, generation-1)
         end
-end
+    end
 
 """
     circuit_evolution(filepath::String; <keyword arguments>)
@@ -271,9 +298,11 @@ end
  where each tuple has the circuit string as first value and the parameters as second value.
  - `convergence_threshold::Float64=5e-4`: Convergence threshold for circuit identification. Increase this to reduce strictness, e.g., in case of noisy measurements.
  - `bounds`::Dict{Char, Vector}: Optional custom bounds for the circuit component parameter values.
-
+- output::String="circuit": The output can be either "circuit" or "results". If "results" is selected, the output will be a results object containing the complete final population of the algorithm run, the corresponding fitnesses, the best circuit, its corresponding fitness value, the number of returned circuits with a fitness value within the convergence threshold, and the number of generations.
 """
-function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",head=8,cutoff=0.8,initial_population = nothing,convergence_threshold=5e-4,verbose=false)
+function circuit_evolution(filepath::String;generations::Real=10,population_size=30,terminals = "RCLP",
+    head=8,cutoff=0.8,initial_population = nothing,convergence_threshold=5e-4,bounds=nothing,verbose=false,output="circuit")
+    @assert output in ["circuit", "results"] "output must be either 'circuit' or 'results'"
     # Read the measurement file.
     meansurement_file = readdlm(filepath,',')
     # convert the measurement data into usable format.
@@ -319,18 +348,24 @@ function circuit_evolution(filepath::String;generations::Real=10,population_size
         end
         replace_redundant_cpes!(population,terminals)
         population = removeduplicates(sort!(vcat(population,elite)))
-        for i in 1:3
+        for i in 1:minimum([3,length(population)])
             population[i] = removeredundancy(population[i],measurements,frequencies,parameter_bounds,terminals,cutoff)
         end
+    # end    
+    if output=="circuit"
         # extract the converged circuits.
-    population = filter(p -> p.fitness ≤ convergence_threshold, population)
-    # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
-    if length(population) == 0
-        @info "Algorithm did not converge"
-    else
-           # best_circuit = readablecircuit(population[1])
-           return  Circuit2EquivalentCircuit(population[1])
+        population = filter(p -> p.fitness ≤ convergence_threshold, population)
+        # in case of no converged circuits => alternate output print statement "Algorithm did not converge"
+        if length(population) == 0
+            @info "Algorithm did not converge"
+        else
+            # best_circuit = readablecircuit(population[1])
+            return  Circuit2EquivalentCircuit(population[1])
         end
+    elseif output=="results"
+        n_converged = count(p -> p.fitness ≤ convergence_threshold, population)
+        return results(population, [c.fitness for c in population], Circuit2EquivalentCircuit(population[1]), population[1].fitness, n_converged, generation-1)
+    end
 end
 
 
@@ -380,7 +415,7 @@ function circuit_evolution_batch(
     bounds=nothing,
     numprocs=num_physical_cores(),
     iters,
-    quiet=false,
+    quiet=false,output="circuit"
 )
     # Set up workers
     _workers = addprocs(min(numprocs, iters))
@@ -406,7 +441,7 @@ function circuit_evolution_batch(
             cutoff=cutoff,
             initial_population=initial_population,
             convergence_threshold=convergence_threshold,
-            bounds=bounds,
+            bounds=bounds,output=output
         ),
         WorkerPool(_workers),
         1:iters,
