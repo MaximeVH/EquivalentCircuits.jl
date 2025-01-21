@@ -114,14 +114,14 @@ end
 # https://github.com/MilesCranmer/SymbolicRegression.jl/blob/master/src/Configure.jl
 function import_module_on_workers(procs)
     @everywhere procs begin
-        Base.MainInclude.eval(:(using EquivalentCircuits))
+        Core.eval(Core.Main, :(using EquivalentCircuits))
     end
 end
 
 
 function disable_logging_distributed(level::Logging.LogLevel, procs::Vector{Int})
     @everywhere procs begin
-        Base.MainInclude.eval(:(using Logging))
+        Core.eval(Core.Main, :(using Logging))
         disable_logging($level)  # Use the variable level here
     end
 end
